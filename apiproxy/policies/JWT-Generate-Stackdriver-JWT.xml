@@ -1,0 +1,18 @@
+<JavaCallout name='JWT-Generate-Stackdriver-JWT' >
+  <Properties>
+    <Property name="algorithm">RS256</Property>
+    <Property name="private-key">{private.stackdriver.privKeyPem}</Property>
+
+    <!-- standard claims -->
+    <Property name="issuer">{stackdriver.jwt_issuer}</Property>
+    <Property name="audience">https://www.googleapis.com/oauth2/v4/token</Property>
+    <Property name="expiresIn">90</Property> <!-- in seconds; for stackdriver, 300 max -->
+
+    <!-- custom claims -->
+    <Property name="claim_scope">https://www.googleapis.com/auth/logging.write</Property>
+
+  </Properties>
+
+  <ClassName>com.apigee.callout.jwtsigned.JwtCreatorCallout</ClassName>
+  <ResourceURL>java://apigee-edge-callout-jwt-signed-1.0.5.jar</ResourceURL>
+</JavaCallout>

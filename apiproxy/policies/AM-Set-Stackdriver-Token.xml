@@ -1,0 +1,7 @@
+<AssignMessage name='AM-Set-Stackdriver-Token'>
+  <AssignVariable>
+    <Name>stackdriver.token</Name>
+    <Ref>stackdriver.newtoken</Ref>
+  </AssignVariable>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+</AssignMessage>

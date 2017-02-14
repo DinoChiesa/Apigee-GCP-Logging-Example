@@ -1,0 +1,9 @@
+<LookupCache name='Cache-Get-Stackdriver-Token'>
+  <CacheResource>cache1</CacheResource>
+  <Scope>Application</Scope>
+  <AssignTo>stackdriver.token</AssignTo>
+  <CacheKey>
+    <Prefix>stackdriverToken</Prefix>
+    <!-- <KeyFragment ref='flowvariable.name' /> -->
+  </CacheKey>
+</LookupCache>

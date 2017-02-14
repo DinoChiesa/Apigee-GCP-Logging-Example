@@ -1,0 +1,23 @@
+{
+  "name": "ucp-apigee-edge-deploy-proxy",
+  "version": "0.1.0",
+  "description": "Tool to import + deploy an API proxy into an organization",
+  "main": "importAndDeployProxy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "dchiesa@google.com",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "archiver": "^1.3.0",
+    "async": "^0.9.0",
+    "merge": "^1.2.0",
+    "netrc": "0.1.3",
+    "node-getopt": "0.2.3",
+    "node-rsa": "^0.4.2",
+    "readline-sync": "^1.4.1",
+    "request": "2.53.0",
+    "sprintf-js": "^1.0.3",
+    "uuid": "^3.0.1"
+  }
+}

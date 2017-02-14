@@ -1,0 +1,21 @@
+<ServiceCallout name='SC-Obtain-Stackdriver-AccessToken'>
+  <Request>
+    <Set>
+      <Headers>
+        <Header name='content-type'>application/x-www-form-urlencoded</Header>
+      </Headers>
+      <FormParams>
+        <FormParam name='grant_type'>urn:ietf:params:oauth:grant-type:jwt-bearer</FormParam>
+        <FormParam name='assertion'>{jwt_jwt}</FormParam>
+      </FormParams>
+      <Verb>POST</Verb>
+    </Set>
+  </Request>
+  <Response>tokenResponse</Response>
+  <HTTPTargetConnection>
+    <Properties>
+      <Property name='success.codes'>2xx, 3xx</Property>
+    </Properties>
+    <URL>https://www.googleapis.com/oauth2/v4/token</URL>
+  </HTTPTargetConnection>
+</ServiceCallout>
