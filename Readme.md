@@ -32,8 +32,14 @@ You also need a project  id and a log id. These are stackdriver things.
 ## Setting up the KVMs and Cache
 
 To set up these pre-requisites, there is a provisionKvmAndCache.js script in the
-tools directory. 
+tools directory.  For this you need to specify things that are specific to your situation, like:
 
+* name of Edge organization and environment
+* Stackdriver "projectid" and "logid"
+* the file that contains the PEM-encoded private key you got from stackdriver
+* the issuer, or email of the service account you got from stackdriver
+
+Example:
 ```
 cd tools
 node ./provisionKvmAndCache.js -n -o cap500 -e test \
@@ -45,20 +51,25 @@ node ./provisionKvmAndCache.js -n -o cap500 -e test \
 
 ## Importing and Deploying the Proxy
 
-You also need to import and deploy the proxy.  To do so:
+You also need to import and deploy the proxy.  To do so, follow the
+example. Again, specify the Edge organization and environment.
 
 ```
 cd tools
-node ./importAndDeployProxy.js -o cap500 -n -d .. -N stackdriver-1 -e test
+node ./importAndDeployProxy.js -n -d .. -N stackdriver-1 -o cap500 -e test
 ```
+
+Everything should succeed. If not, then you don't have a CPS-enabled
+org, or the cache or KVMs were not properly configured.
 
 
 ## Invoking the Proxy
 
+
 ```
 curl -i https://cap500-test.apigee.net/stackdriver-1/t1 \
   -H content-type:application/json \
-  -d '{ "payload" : "thanks for all the fish" }'
+  -d '{ "payload" : "YOUR MESSAGE GOES HERE" }'
 
 ```
 
