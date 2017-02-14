@@ -14,7 +14,14 @@ There are multiple things required:
 all environment-scoped.
 
 
-## First things first
+## A Screencast
+
+This is me talking through how it works:
+
+[![Youtube video: Using Stackdriver from Edge](./images/screenshot-20170214-115338.png)](http://www.youtube.com/watch?v=ozxELv8Z2G0 "Using Stackdriver from Edge")
+
+
+## How to use: First things first
 
 Get your service account set up with the Google API console.
 You need a private key, and a client_id or email account for the service account.
