@@ -15,7 +15,7 @@
   },
   "entries": [{
       "severity" : "INFO",
-      "textPayload" : "Hello {stackdriver.logpayload}"
+      "textPayload" : "{stackdriver.logpayload}"
      }
   ],
   "partialSuccess": true

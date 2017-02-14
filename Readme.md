@@ -16,7 +16,7 @@ all environment-scoped.
 
 ## A Screencast
 
-This is me talking through how it works:
+Here's a talk-through of how it works. Click the image to see the screencast:
 
 [![Youtube video: Using Stackdriver from Edge](./images/screenshot-20170214-115338.png)](http://www.youtube.com/watch?v=ozxELv8Z2G0 "Using Stackdriver from Edge")
 
@@ -61,3 +61,9 @@ curl -i https://cap500-test.apigee.net/stackdriver-1/t1 \
   -d '{ "payload" : "thanks for all the fish" }'
 
 ```
+
+## View the logs in Stackdriver
+
+Then, open the Stackdriver webapp and view the log messages:
+
+![Youtube video: Using Stackdriver from Edge](./images/screenshot-20170214-120451.png)
