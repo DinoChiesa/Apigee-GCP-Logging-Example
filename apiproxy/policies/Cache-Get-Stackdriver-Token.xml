@@ -3,7 +3,8 @@
   <Scope>Application</Scope>
   <AssignTo>stackdriver.token</AssignTo>
   <CacheKey>
-    <Prefix>stackdriverToken</Prefix>
+    <!-- <Prefix>stackdriver.token</Prefix> -->
+    <KeyFragment>stackdriver.token</KeyFragment>
     <!-- <KeyFragment ref='flowvariable.name' /> -->
   </CacheKey>
 </LookupCache>

@@ -3,7 +3,8 @@
   <Scope>Application</Scope>
   <Source>stackdriver.newtoken</Source>
   <CacheKey>
-    <Prefix>stackdriverToken</Prefix>
+    <!-- <Prefix>stackdriver.token</Prefix> -->
+    <KeyFragment>stackdriver.token</KeyFragment>
     <!-- <KeyFragment ref='variable.containing.keyfrag' /> -->
   </CacheKey>
   <ExpirySettings>

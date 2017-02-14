@@ -14,47 +14,47 @@
     <Response>
     </Response>
   </PreFlow>
-  <PostFlow name='PostFlow'>
-      <Request/>
-      <Response>
 
-        <Step>
-          <Name>KVM-Get-Stackdriver-Settings</Name>
-        </Step>
-        <Step><Name>Cache-Get-Stackdriver-Token</Name></Step>
-        <Step>
-          <Name>KVM-Get-Stackdriver-PrivateKey</Name>
-          <Condition>stackdriver.token = null</Condition>
-        </Step>
-        <Step>
-          <Name>JWT-Generate-Stackdriver-JWT</Name>
-          <Condition>stackdriver.token = null</Condition>
-        </Step>
-        <Step>
-          <Name>SC-Obtain-Stackdriver-AccessToken</Name>
-          <Condition>stackdriver.token = null</Condition>
-        </Step>
-        <Step>
-          <Name>Extract-Stackdriver-AccessToken</Name>
-          <Condition>stackdriver.token = null</Condition>
-        </Step>
-        <Step>
-          <Name>RF-No-AccessToken</Name>
-          <Condition>stackdriver.newtoken = null</Condition>
-        </Step>
-        <Step>
-          <Name>Cache-Put-Stackdriver-Token</Name>
-          <Condition>stackdriver.token = null</Condition>
-        </Step>
-        <Step>
-          <Name>AM-Set-Stackdriver-Token</Name>
-          <Condition>stackdriver.token = null</Condition>
-        </Step>
-        <Step>
-          <Name>SC-Log-To-Stackdriver</Name>
-        </Step>
-        <Step><Name>AM-CleanResponseHeaders</Name></Step>
-      </Response>
+  <PostFlow name='PostFlow'>
+    <Request/>
+    <Response>
+      <Step>
+        <Name>KVM-Get-Stackdriver-Settings</Name>
+      </Step>
+      <Step><Name>Cache-Get-Stackdriver-Token</Name></Step>
+      <Step>
+        <Name>KVM-Get-Stackdriver-PrivateKey</Name>
+        <Condition>stackdriver.token = null</Condition>
+      </Step>
+      <Step>
+        <Name>JWT-Generate-Stackdriver-JWT</Name>
+        <Condition>stackdriver.token = null</Condition>
+      </Step>
+      <Step>
+        <Name>SC-Obtain-Stackdriver-AccessToken</Name>
+        <Condition>stackdriver.token = null</Condition>
+      </Step>
+      <Step>
+        <Name>Extract-Stackdriver-AccessToken</Name>
+        <Condition>stackdriver.token = null</Condition>
+      </Step>
+      <Step>
+        <Name>RF-No-AccessToken</Name>
+        <Condition>(stackdriver.token = null) and (stackdriver.newtoken = null)</Condition>
+      </Step>
+      <Step>
+        <Name>Cache-Put-Stackdriver-Token</Name>
+        <Condition>(stackdriver.token = null) and (stackdriver.newtoken != null)</Condition>
+      </Step>
+      <Step>
+        <Name>AM-Set-Stackdriver-Token</Name>
+        <Condition>stackdriver.token = null</Condition>
+      </Step>
+      <Step>
+        <Name>SC-Log-To-Stackdriver</Name>
+      </Step>
+      <Step><Name>AM-CleanResponseHeaders</Name></Step>
+    </Response>
   </PostFlow>
 
   <Flows>
