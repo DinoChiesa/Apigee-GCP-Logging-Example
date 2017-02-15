@@ -45,8 +45,7 @@ For example:
 The request for token looks like this:
 
 ```
-POST /oauth2/v4/token HTTP/1.1
-Host: www.googleapis.com
+POST https://www.googleapis.com/oauth2/v4/token HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=JWT_GOES_HERE
@@ -62,9 +61,9 @@ If the JWT is valid, googleapis.com will return an access token, which will have
 }
 ```
 
-That access token can then be used against the stackdriver APIs. 
+That access token can then be used against the Stackdriver APIs. 
 
-The point here is that a system that logs to stackdriver must obtain and cache the access token, and must be able to obtain new access tokens on expiry.
+The point here is that a system that logs to Stackdriver must obtain and cache the access token, and must be able to obtain new access tokens on expiry.
 
 Once the system has a valid access token, it can invoke the Stackdriver API for logging. That looks like this:
 
@@ -91,7 +90,6 @@ Authorization: Bearer :token
 ```
 
 
-
 ## Required in Edge
 
 To support the management of tokens for use against Stackdriver, there are multiple artifacts required on the Apigee Edge side:
@@ -102,8 +100,10 @@ To support the management of tokens for use against Stackdriver, there are multi
 
 All environment-scoped.
 
-The secrets1 KVM stores the private key of the client (the service account), which is used to sign the JWT required to get each new access token.
-The cache stores the access token for its lifetime.  And the other KVM stores other stackdriver-related settings, like the project ID and so on.
+The secrets1 KVM stores the private key of the client (the service account), which
+is used to sign the JWT required to get each new access token.  The cache stores
+the access token for its lifetime.  And the other KVM stores other
+stackdriver-related settings, like the project ID and so on.
 
 
 ## Some Screencasts to guide you
@@ -177,26 +177,32 @@ the cache or KVMs were not properly configured.
 
 ## Invoking the Proxy
 
+After you've provisioned the KVM and cache, and then imported and deployed the proxy, you should be able to invoke it.  Here's a sample call: 
+
 ```
-curl -i https://cap500-test.apigee.net/stackdriver-1/t1 \
+curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
   -H content-type:application/json \
   -d '{ "payload" : "YOUR MESSAGE GOES HERE" }'
 ```
 
+
 ## View the logs in Stackdriver
 
-Then, open the Stackdriver webapp and view the log messages:
+Then, open [the Stackdriver logviewer webapp](https://console.cloud.google.com/logs/viewer) to view the log messages:
 
 ![Youtube video: Using Stackdriver from Edge](./images/screenshot-20170214-120451.png)
 
 
 ## Dependencies
 
-This project depends on the JAR from the JWT Generator callout that is available [here](https://github.com/apigee/iloveapis2015-jwt-jwe-jws).
-I've just included the binary JAR.  If for some reason you want to re-build the JAR from source, see that repo. 
+This project depends on the JAR from the JWT Generator callout that is available
+[here](https://github.com/apigee/iloveapis2015-jwt-jwe-jws).  I've just included
+the binary JAR.  If for some reason you want to re-build the JAR from source, see
+that repo.
 
 
 ## License
 
-This material is copyright 2017 Google Inc.
-and is licensed under the [Apache 2.0 License](LICENSE). This includes the the API Proxy configuration as well as the nodejs tools.
+This material is copyright 2017 Google Inc.  and is licensed under the [Apache 2.0
+License](LICENSE). This includes the the API Proxy configuration as well as the
+nodejs tools and libraries.
