@@ -20,9 +20,10 @@ Here's a talk-through of how it works. Click the image to see the screencast:
 
 ### Part 1: setting up Stackdriver
 
+[![Youtube video: Setting up a Stackdriver Account](./images/screenshot-20170215-105158.png)](http://www.youtube.com/watch?v=7tkAkykALNs "Setting up a Stackdriver Account")
+
+
 ### Part 2: Configuring Edge and using the API Proxy
-
-
 
 [![Youtube video: Using Stackdriver from Edge](./images/screenshot-20170214-115338.png)](http://www.youtube.com/watch?v=ozxELv8Z2G0 "Using Stackdriver from Edge")
 
