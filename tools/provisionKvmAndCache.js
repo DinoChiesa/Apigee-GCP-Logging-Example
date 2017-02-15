@@ -5,15 +5,13 @@
 // provision the KVMs and cache for the example API proxy that logs to
 // stackdriver.
 //
-// last saved: <2017-February-15 09:34:48>
+// last saved: <2017-February-15 14:13:06>
 
 var fs = require('fs'),
     common = require('./lib/utility.js'),
     sprintf = require('sprintf-js').sprintf,
     async = require('async'),
     apigeeEdge = require('./lib/edge.js'),
-    NodeRSA = require('node-rsa'),
-    uuidV4 = require('uuid/v4'),
     Getopt = require('node-getopt'),
     version = '20170215-0934',
     stackdriverJson,

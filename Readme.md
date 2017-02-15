@@ -150,6 +150,16 @@ service account, generate a new private key for the service account, and save th
 private key to a JSON file.  All of this is shown in the screencast.
 
 
+## Installing node libraries
+
+The tools use Node, and rely on various NPM libraries. So before you use them you will need to install the libraries:
+
+```
+cd tools
+npm install
+```
+
+
 ## Setting up the KVMs and Cache
 
 This part is covered in the "Part 2" Screencast.
