@@ -4,28 +4,30 @@
 // ------------------------------------------------------------------
 // import and deploy an Apigee Edge proxy bundle
 //
-// last saved: <2017-February-13 21:45:23>
+// last saved: <2017-February-15 09:34:41>
 
 var fs = require('fs'),
     common = require('./lib/utility.js'),
     sprintf = require('sprintf-js').sprintf,
     apigeeEdge = require('./lib/edge.js'),
     Getopt = require('node-getopt'),
-    version = '20170213-2144',
-    defaults = { basepath : '/' },
+    version = '20170215-0934',
+    path = require('path'),
+    scriptRoot = path.resolve(__dirname),
+    defaults = { basepath : '/', srcdir: path.resolve(path.join(scriptRoot, '..')), proxyname: 'stackdriver-1'},
     getopt = new Getopt(common.commonOptions.concat([
-      ['d' , 'srcdir=ARG', 'source directory for the proxy files. Should be parent of dir "apiproxy"'],
-      ['N' , 'proxyname=ARG', 'name for API proxy '],
-      ['e' , 'env=ARG', 'the Edge environment.'],
-      ['b' , 'basepath=ARG', 'basepath for deploying the API Proxy. Default: ' + defaults.basepath],
-      ['X' , 'nodeploy', 'do not deploy the API Proxy.']
+      ['e' , 'env=ARG', 'required. the Edge environment.'],
+      ['d' , 'srcdir=ARG', 'optional. source directory for the proxy files. Should be parent of dir "apiproxy". Default: ' + defaults.srcdir],
+      ['N' , 'proxyname=ARG', 'optional. name for API proxy. Default: ' + defaults.proxyname],
+      ['b' , 'basepath=ARG', 'optional. basepath for deploying the API Proxy. Default: ' + defaults.basepath],
+      ['X' , 'nodeploy', 'optional. Import only; do not deploy the API Proxy.']
     ])).bindHelp();
 
 
 // ========================================================
 
 console.log(
-  'Apigee Edge Proxy Import + Deploy tool, version: ' + version + '\n' +
+  'Apigee Edge Proxy Import + Deploy tool for Stackdriver demo, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
 
 common.logWrite('start');
@@ -34,15 +36,13 @@ common.logWrite('start');
 var opt = getopt.parse(process.argv.slice(2));
 
 if ( !opt.options.srcdir ) {
-  console.log('You must specify a source directory');
-  getopt.showHelp();
-  process.exit(1);
+  common.logWrite(sprintf('defaulting to %s for srcdir', defaults.srcdir));
+  opt.options.srcdir = defaults.srcdir;
 }
 
 if ( !opt.options.proxyname ) {
-  console.log('You must specify a name for the proxy');
-  getopt.showHelp();
-  process.exit(1);
+  common.logWrite(sprintf('defaulting to %s for proxyname', defaults.proxyname));
+  opt.options.proxyname = defaults.proxyname;
 }
 
 common.verifyCommonRequiredParameters(opt.options, getopt);

@@ -4,7 +4,7 @@
 // library of functions for Apigee Edge
 //
 // created: Mon Jun  6 17:32:20 2016
-// last saved: <2017-February-13 18:16:47>
+// last saved: <2017-February-14 17:54:48>
 
 (function (){
   var path = require('path'),
@@ -15,7 +15,7 @@
       merge = require('merge'),
       common = require('./utility.js'),
       request = require('request'),
-      gRequestOptions, gUrlBase;
+      gRequestOptions, gUrlBase, gOrgProperties = null;
 
   function commonCallback(okstatuses, cb) {
     return function (error, response, body) {
@@ -39,13 +39,13 @@
   function _setEdgeConnection(mgmtserver, org, requestOptions) {
     gUrlBase = common.joinUrlElements(mgmtserver, '/v1/o/', org);
     gRequestOptions = merge(true, requestOptions);
+    gOrgProperties = null;
   }
 
   function _get(url, cb) {
     common.logWrite(sprintf('GET %s', url));
     request.get(url, gRequestOptions, commonCallback([200], cb));
   }
-
 
   function _deployAsset(options, assetType, cb) {
     // curl -X POST \
@@ -265,51 +265,97 @@
     request.get(requestOptions, commonCallback([200], cb));
   }
 
-  function _putKvm(options, cb) {
-    //
-    // PUT :mgmtserver/v1/o/:orgname/e/:env/keyvaluemaps/:mapname/entries/key1
-    // Authorization: :edge-auth
-    // content-type: application/json
-    //
-    // {
-    //    "name" : "key1",
-    //    "value" : "value_one_updated"
-    // }
-
-    var requestOptions = merge(true, gRequestOptions);
-    requestOptions.url = resolveKvmPath(options);
-    requestOptions.url = common.joinUrlElements(requestOptions.url, options.kvm, 'entries', options.key);
-    common.logWrite(sprintf('GET %s', requestOptions.url));
-    request.get(requestOptions, function(error, response, body) {
-      if (error) {
-        console.log(error);
-        return cb(error, body);
-      }
-      requestOptions.url = resolveKvmPath(options);
-      requestOptions.url = common.joinUrlElements(requestOptions.url, options.kvm, 'entries');
-
-      if (response.statusCode == 200) {
-        // Update is required if the key already exists.
-        common.logWrite('update');
-        requestOptions.url = common.joinUrlElements(requestOptions.url, options.key);
-      }
-      else if (response.statusCode == 404) {
-        common.logWrite('create');
-      }
-
-      if ((response.statusCode == 200) || (response.statusCode == 404)) {
-        requestOptions.headers['content-type'] = 'application/json';
-        requestOptions.body = JSON.stringify({ name: options.key, value : options.value });
-        common.logWrite(sprintf('POST %s', requestOptions.url));
-        request.post(requestOptions, commonCallback([200, 201], cb));
-      }
-      else {
-        console.log(body);
-        cb({error: 'bad status', statusCode: response.statusCode });
-      }
-    });
+  function _checkProperties(cb) {
+    return _get(gUrlBase, cb);
   }
 
+  function transformToHash(properties) {
+    var hash = {};
+    properties.forEach(function(item) {
+      hash[item.name] = item.value;
+    });
+    return hash;
+  }
+
+  function _putKvm(options, cb) {
+    if ( ! gOrgProperties) {
+      return _checkProperties(function(e, result) {
+        if (e) {
+          console.log(e);
+          return cb(e, result);
+        }
+        gOrgProperties = transformToHash(result.properties.property);
+        return _putKvm0(options, cb);
+      });
+    }
+    else {
+      return _putKvm0(options, cb);
+    }
+  }
+
+  function _putKvm0(options, cb) {
+    var requestOptions = merge(true, gRequestOptions);
+    requestOptions.url = resolveKvmPath(options);
+
+    if (gOrgProperties['features.isCpsEnabled']) {
+      requestOptions.url = common.joinUrlElements(requestOptions.url, options.kvm, 'entries', options.key);
+      common.logWrite(sprintf('GET %s', requestOptions.url));
+      request.get(requestOptions, function(error, response, body) {
+        if (error) {
+          common.logWrite(error);
+          return cb(error, body);
+        }
+        requestOptions.url = resolveKvmPath(options);
+        requestOptions.url = common.joinUrlElements(requestOptions.url, options.kvm, 'entries');
+
+        if (response.statusCode == 200) {
+          // Update is required if the key already exists.
+          common.logWrite('update');
+          requestOptions.url = common.joinUrlElements(requestOptions.url, options.key);
+        }
+        else if (response.statusCode == 404) {
+          common.logWrite('create');
+        }
+
+        if ((response.statusCode == 200) || (response.statusCode == 404)) {
+          //
+          // POST :mgmtserver/v1/o/:orgname/e/:env/keyvaluemaps/:mapname/entries/key1
+          // Authorization: :edge-auth
+          // content-type: application/json
+          //
+          // {
+          //    "name" : "key1",
+          //    "value" : "value_one_updated"
+          // }
+          requestOptions.headers['content-type'] = 'application/json';
+          requestOptions.body = JSON.stringify({ name: options.key, value : options.value });
+          common.logWrite(sprintf('POST %s', requestOptions.url));
+          request.post(requestOptions, commonCallback([200, 201], cb));
+        }
+        else {
+          common.logWrite(body);
+          cb({error: 'bad status', statusCode: response.statusCode });
+        }
+      });
+    }
+    else {
+      // for non-CPS KVM, use a different model to add/update an entry.
+      //
+      // POST :mgmtserver/v1/o/:orgname/e/:env/keyvaluemaps/:mapname
+      // Authorization: :edge-auth
+      // content-type: application/json
+      //
+      // {
+      //    "entry": [ {"name" : "key1", "value" : "value_one_updated" } ],
+      //    "name" : "mapname"
+      // }
+      requestOptions.url = common.joinUrlElements(requestOptions.url, options.kvm);
+      requestOptions.headers['content-type'] = 'application/json';
+      requestOptions.body = JSON.stringify({ name: options.kvm, entry: [{ name: options.key, value : options.value }] });
+      common.logWrite(sprintf('POST %s', requestOptions.url));
+      request.post(requestOptions, commonCallback([200, 201], cb));
+    }
+  }
 
   function _createKvm(options, cb) {
     // POST :mgmtserver/v1/o/:orgname/e/:env/keyvaluemaps

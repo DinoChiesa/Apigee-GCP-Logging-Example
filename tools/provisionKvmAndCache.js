@@ -5,7 +5,7 @@
 // provision the KVMs and cache for the example API proxy that logs to
 // stackdriver.
 //
-// last saved: <2017-February-13 22:02:54>
+// last saved: <2017-February-15 09:34:48>
 
 var fs = require('fs'),
     common = require('./lib/utility.js'),
@@ -15,17 +15,16 @@ var fs = require('fs'),
     NodeRSA = require('node-rsa'),
     uuidV4 = require('uuid/v4'),
     Getopt = require('node-getopt'),
-    version = '20170213-1758',
-    defaults = { secretsmap : 'secrets1', settingsmap: 'settings1', cache: 'cache1' },
+    version = '20170215-0934',
+    stackdriverJson,
+    defaults = { secretsmap : 'secrets1', settingsmap: 'settings1', cache: 'cache1', logid: 'syslog' },
     getopt = new Getopt(common.commonOptions.concat([
-      ['e' , 'env=ARG', 'the Edge environment for which to store the KVM data'],
-      ['K' , 'secretsmap=ARG', 'optional. name of the KVM in Edge for keys. Will be created if nec. Default: ' + defaults.secretsmap],
+      ['e' , 'env=ARG', 'required. the Edge environment for which to store the KVM data'],
+      ['Z' , 'secretsmap=ARG', 'optional. name of the KVM in Edge for keys. Will be created if nec. Default: ' + defaults.secretsmap],
       ['C' , 'cache=ARG', 'optional. name of the Cache in Edge. Will be created if nec. Default: ' + defaults.cache],
       ['S' , 'settingsmap=ARG', 'optional. name of the KVM in Edge for other non-secret settings. Will be created if nec. Default: ' + defaults.settingsmap],
-      ['P' , 'projectid=ARG', 'required. stackdriver profile id for logging.'],
-      ['L' , 'logid=ARG', 'required. stackdriver log id for logging.'],
-      ['I' , 'issuer=ARG', 'required. issuer for the JWT for stackdriver.'],
-      ['k' , 'privkeypem=ARG', 'required. file containing private key (PEM format)']
+      ['J' , 'privkeyjson=ARG', 'required. stackdriver JSON private key file.'],
+      ['L' , 'logid=ARG', 'optional. stackdriver log id for logging. Default: ' + defaults.logid]
     ])).bindHelp();
 
 // ========================================================
@@ -44,27 +43,19 @@ if ( !opt.options.env ) {
   getopt.showHelp();
   process.exit(1);
 }
-if ( !opt.options.projectid ) {
-  console.log('You must specify a projectid (-P)');
-  getopt.showHelp();
-  process.exit(1);
-}
-if ( !opt.options.logid ) {
-  console.log('You must specify a logid (-L)');
-  getopt.showHelp();
-  process.exit(1);
-}
-if ( !opt.options.issuer ) {
-  console.log('You must specify an issuer (-I)');
-  getopt.showHelp();
-  process.exit(1);
-}
-if ( !opt.options.privkeypem ) {
-  console.log('You must specify a file containing the private key (-k)');
+if ( !opt.options.privkeyjson ) {
+  console.log('You must specify a JSON file (-J)');
   getopt.showHelp();
   process.exit(1);
 }
 
+stackdriverJson = require(opt.options.privkeyjson);
+
+// apply defaults
+if ( !opt.options.logid ) {
+  common.logWrite(sprintf('defaulting to %s for logid', defaults.logid));
+  opt.options.logid = defaults.logid;
+}
 if ( !opt.options.secretsmap ) {
   common.logWrite(sprintf('defaulting to %s for secrets map', defaults.secretsmap));
   opt.options.secretsmap = defaults.secretsmap;
@@ -81,8 +72,9 @@ if ( !opt.options.cache ) {
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
 function loadDataIntoMaps(cb) {
-  var re = new RegExp('(?:\r\n|\r|\n)', 'g');
-  var pemString = fs.readFileSync(opt.options.privkeypem, 'utf8').replace(re,'\\n');
+  // var re = new RegExp('(?:\r\n|\r|\n)', 'g');
+  // var pemString = fs.readFileSync(opt.options.privkeypem, 'utf8').replace(re,'\\n');
+  var pemString = stackdriverJson.private_key;
   var options = {
         env: opt.options.env,
         kvm: opt.options.secretsmap,
@@ -94,7 +86,7 @@ function loadDataIntoMaps(cb) {
     if (e) return cb(e, result);
     options.kvm = opt.options.settingsmap;
     options.key = 'stackdriver.projectid';
-    options.value = opt.options.projectid;
+    options.value = stackdriverJson.project_id;
     apigeeEdge.putKvm(options, function(e, result){
       if (e) return cb(e, result);
       options.key = 'stackdriver.logid';
@@ -102,7 +94,7 @@ function loadDataIntoMaps(cb) {
       apigeeEdge.putKvm(options, function(e, result){
         if (e) return cb(e, result);
         options.key = 'stackdriver.jwt_issuer';
-        options.value = opt.options.issuer;
+        options.value = stackdriverJson.client_email;
         apigeeEdge.putKvm(options, function(e, result){
           if (e) return cb(e, result);
           cb(null, result);
@@ -128,7 +120,6 @@ function kvmsLoadedCb(e, result){
     common.logWrite('ok. the cache exists.');
   });
 }
-
 
 function checkAndCreateCache(cb) {
   apigeeEdge.getCaches({ env: opt.options.env }, function(e, result){

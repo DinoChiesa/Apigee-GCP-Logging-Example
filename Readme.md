@@ -31,36 +31,45 @@ You also need a project  id and a log id. These are stackdriver things.
 
 ## Setting up the KVMs and Cache
 
-To set up these pre-requisites, there is a provisionKvmAndCache.js script in the
-tools directory.  For this you need to specify things that are specific to your situation, like:
+To set up these pre-requisites, there is a [provisionKvmAndCache.js](./tools/provisionKvmAndCache.js) script in the
+tools directory. For this you need to specify:
 
 * name of Edge organization and environment
-* Stackdriver "projectid" and "logid"
-* the file that contains the PEM-encoded private key you got from stackdriver
+* the JSON file that you download from Stackdriver
+
+The JSON file contains information such as: 
+
+* Stackdriver project id
+* the PEM-encoded private key you got from stackdriver
 * the issuer, or email of the service account you got from stackdriver
+
 
 Example:
 ```
 cd tools
-node ./provisionKvmAndCache.js -n -o cap500 -e test \
-    -P fine-guru -L syslog  \
-    -k ~/dev/stackdriver/fine-guru.privatekey \
-    -I service-account-1@fine-guru.iam.gserviceaccount.com
-
+node ./provisionKvmAndCache.js  -n -o cap500 -e test \ 
+    -J ~/dev/stackdriver/project-apigee-edge-0bb2933e52e4.json  
 ```
+
+There are some optional parameters to this script as well, but you probably won't need them.
+Make sure everything succeeds.
+
 
 ## Importing and Deploying the Proxy
 
-You also need to import and deploy the proxy.  To do so, follow the
-example. Again, specify the Edge organization and environment.
+After provisioning the KVMs and Cache, you also need to import and deploy the proxy.  To do so, run the 
+[importAndDeployProxy.js](./tools/importAndDeployProxy.js) script. Again, specify the Edge organization and environment.
 
 ```
 cd tools
-node ./importAndDeployProxy.js -n -d .. -N stackdriver-1 -o cap500 -e test
+node ./importAndDeployProxy.js -n -o cap500 -e test 
 ```
 
-Everything should succeed. If not, then you don't have a CPS-enabled
-org, or the cache or KVMs were not properly configured.
+There are some optional parameters; you probably won't need them.
+
+Everything should succeed. If not, then check if 
+the cache or KVMs were not properly configured.
+
 
 
 ## Invoking the Proxy
