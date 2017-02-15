@@ -1,20 +1,112 @@
 # Stackdriver demo proxy
 
-Monday, 13 February 2017, 17:54
-
 This API Proxy shows how to do logging from Edge to Stackdriver using
-built-in policies, plus the JWT generator. 
+built-in policies, plus the JWT Generator callout. 
 
-There are multiple things required:
+## What is Stackdriver?
+
+[Stackdriver](https://stackdriver) is a SaaS for logging, monitoring, and
+alerting. It started as an independent company but was acquired by Google in 2014,
+and is now part of the Google Cloud Platform (as is Apigee Edge!). Stackdriver
+exposes a REST API to allow systems or applications to write log messages into the
+Stackdriver log.  There is a UI for viewing the messages, configuring alerts on
+the messages, and so on.
+
+## How does Stackdriver complement Apigee Edge?
+
+Some people embed MessageLogging policies into the API Proxies they have in Apigee Edge in order to log messages that can later be examined or analyzed, to diagnose problems or simply to monitor their systems. MessageLogging works for syslog listeners. For example, Splunk has a syslog listener that will accept inbound messages from a MessageLogging policy configured in Apigee Edge.
+
+But some people don't like the expense of Splunk, and are considering using the Google Cloud Platform.  This example shows how you can use Stackdriver, part of GCP, to collect and aggregate log messages from Edge, using built-in policies. 
+
+## How it works
+
+The Stackdriver API supports OAuth 2.0 for inbound API calls to write (or read, or query) log messages. For our purposes, we want Apigee Edge to only write messages.
+The OAuth token is a standard bearer token, and Google dispenses the token via an RFC7523 grant.  This is very much like a client credentials grant as described in [RFC 6749 - OAuth 2.0](https://tools.ietf.org/html/rfc6749), except, rather than sending in a client_id and client_secret in order to obtain a token, the client must generate and self-sign a JWT, and send that JWT in the request-for-token. There are some requirements on the JWT.  It must: 
+
+* include the client email as the issuer
+* specify "https://www.googleapis.com/oauth2/v4/token" as the audience
+* specify "https://www.googleapis.com/auth/logging.write" as the scope claim
+* expire within 300 seconds
+* be signed with the client's private key.
+
+For example: 
+
+```json
+{"alg":"RS256","typ":"JWT"}
+{
+  "iss":"service-account-1@project-name-here.iam.gserviceaccount.com",
+  "scope":"https://www.googleapis.com/auth/logging.write",
+  "aud":"https://www.googleapis.com/oauth2/v4/token",
+  "exp":1328554385,
+  "iat":1328550785
+}
+```
+
+The request for token looks like this:
+
+```
+POST /oauth2/v4/token HTTP/1.1
+Host: www.googleapis.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=JWT_GOES_HERE
+```
+
+If the JWT is valid, googleapis.com will return an access token, which will have a lifetime of 1 hour.  (Though Google may change this I suppose). The response looks like this:
+
+```json
+{
+  "access_token" : "1/8xbJqaOZXSUZbHLl5EOtu1pxz3fmmetKx9W8CV4t79M",
+  "token_type" : "Bearer",
+  "expires_in" : 3600
+}
+```
+
+That access token can then be used against the stackdriver APIs. 
+
+The point here is that a system that logs to stackdriver must obtain and cache the access token, and must be able to obtain new access tokens on expiry.
+
+Once the system has a valid access token, it can invoke the Stackdriver API for logging. That looks like this:
+
+```
+POST https://logging.googleapis.com/v2/entries:write
+Authorization: Bearer :token
+
+{
+  "logName": "projects/:projectid/logs/:logid",
+  "resource" : {
+    "type": "api",
+    "labels": { }
+  },
+  "labels": {
+      "flavor": "test"
+  },
+  "entries": [{
+      "severity" : "INFO",
+      "textPayload" : "Hello I must be going"
+     }
+  ],
+  "partialSuccess": true
+}
+```
+
+
+
+## Required in Edge
+
+To support the management of tokens for use against Stackdriver, there are multiple artifacts required on the Apigee Edge side:
 
  - encrypted KVM called "secrets1"
  - regular KVM called "settings1"
  - cache called cache1
 
-all environment-scoped.
+All environment-scoped.
+
+The secrets1 KVM stores the private key of the client (the service account), which is used to sign the JWT required to get each new access token.
+The cache stores the access token for its lifetime.  And the other KVM stores other stackdriver-related settings, like the project ID and so on.
 
 
-## Some Screencasts to show it working. 
+## Some Screencasts to guide you
 
 Here's a talk-through of how it works. Click the image to see the screencast:
 
@@ -30,14 +122,21 @@ Here's a talk-through of how it works. Click the image to see the screencast:
 
 ## How to use: First things first
 
-Get your service account set up with the Google API console.
-You need a private key, and a client_id or email account for the service account.
-Save the private key to a file. 
-You also need a project  id and a log id. These are stackdriver things.
+This is covered in the "Part 1" screencast above.  Go to
+[stackdriver](https://stackdriver.com), and set up a project; select a unique
+project id.  Also, using [the Google API
+console](https://console.cloud.google.com/apis), enable the project for the
+Stackdriver APIs.  Finally, using [the service accounts management
+page](https://console.developers.google.com/iam-admin/serviceaccounts), create a
+service account, generate a new private key for the service account, and save the
+private key to a JSON file.  All of this is shown in the screencast.
 
 
 ## Setting up the KVMs and Cache
 
+This part is covered in the "Part 2" Screencast.
+
+The API Proxy within Apigee Edge uses a cache and a couple KVM maps.
 To set up these pre-requisites, there is a [provisionKvmAndCache.js](./tools/provisionKvmAndCache.js) script in the
 tools directory. For this you need to specify:
 
@@ -47,8 +146,8 @@ tools directory. For this you need to specify:
 The JSON file contains information such as: 
 
 * Stackdriver project id
-* the PEM-encoded private key you got from stackdriver
-* the issuer, or email of the service account you got from stackdriver
+* the PEM-encoded private key you got from Stackdriver
+* the issuer, or email of the service account you got from Stackdriver
 
 
 Example:
