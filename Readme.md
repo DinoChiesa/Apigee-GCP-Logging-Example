@@ -14,14 +14,28 @@ the messages, and so on.
 
 ## How does Stackdriver complement Apigee Edge?
 
-Some people embed MessageLogging policies into the API Proxies they have in Apigee Edge in order to log messages that can later be examined or analyzed, to diagnose problems or simply to monitor their systems. MessageLogging works for syslog listeners. For example, Splunk has a syslog listener that will accept inbound messages from a MessageLogging policy configured in Apigee Edge.
+Some people embed MessageLogging policies into the API Proxies they have in Apigee
+Edge in order to log messages that can later be examined or analyzed, to diagnose
+problems or simply to monitor their systems. MessageLogging works for syslog
+listeners. For example, Splunk has a syslog listener that will accept inbound
+messages from a MessageLogging policy configured in Apigee Edge.
 
-But some people don't like the expense of Splunk, and are considering using the Google Cloud Platform.  This example shows how you can use Stackdriver, part of GCP, to collect and aggregate log messages from Edge, using built-in policies. 
+But some people don't like the expense of Splunk, and are considering using the
+Google Cloud Platform.  This example shows how you can use Stackdriver, part of
+GCP, to collect and aggregate log messages from Edge, using built-in policies.
 
 ## How it works
 
-The Stackdriver API supports OAuth 2.0 for inbound API calls to write (or read, or query) log messages. For our purposes, we want Apigee Edge to only write messages.
-The OAuth token is a standard bearer token, and Google dispenses the token via an RFC7523 grant.  This is very much like a client credentials grant as described in [RFC 6749 - OAuth 2.0](https://tools.ietf.org/html/rfc6749), except, rather than sending in a client_id and client_secret in order to obtain a token, the client must generate and self-sign a JWT, and send that JWT in the request-for-token. There are some requirements on the JWT.  It must: 
+The Stackdriver API supports OAuth 2.0 for inbound API calls to write (or read, or
+query) log messages. For our purposes, we want Apigee Edge to only write messages.
+The OAuth token is a standard bearer token, and Google dispenses the token via an
+RFC7523 grant (see [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client
+Authentication and Authorization Grants](https://tools.ietf.org/html/rfc7523)).
+Thisgrant is very much like a client credentials grant as described in [RFC 6749 -
+OAuth 2.0](https://tools.ietf.org/html/rfc6749), except, rather than sending in a
+client_id and client_secret in order to obtain a token, the client must generate
+and self-sign a JWT, and send that JWT in the request-for-token. There are some
+requirements on the JWT. It must:
 
 * include the client email as the issuer
 * specify "https://www.googleapis.com/oauth2/v4/token" as the audience
@@ -51,7 +65,9 @@ Content-Type: application/x-www-form-urlencoded
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=JWT_GOES_HERE
 ```
 
-If the JWT is valid, googleapis.com will return an access token, which will have a lifetime of 1 hour.  (Though Google may change this I suppose). The response looks like this:
+If the JWT is valid, googleapis.com will return an access token, which will have a
+lifetime of 1 hour.  (Though Google may change this I suppose). The response looks
+like this:
 
 ```json
 {
