@@ -7,7 +7,7 @@ built-in policies, plus the JWT Generator callout.
 
 [Stackdriver](https://stackdriver) is a SaaS for logging, monitoring, and
 alerting. It started as an independent company but was acquired by Google in 2014,
-and is now part of the Google Cloud Platform (as is Apigee Edge!). Stackdriver
+and is now part of the Google Cloud Platform (as is Apigee Edge). Stackdriver
 exposes a REST API to allow systems or applications to write log messages into the
 Stackdriver log.  There is a UI for viewing the messages, configuring alerts on
 the messages, and so on.
@@ -31,7 +31,7 @@ query) log messages. For our purposes, we want Apigee Edge to only write message
 The OAuth token is a standard bearer token, and Google dispenses the token via an
 RFC7523 grant (see [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client
 Authentication and Authorization Grants](https://tools.ietf.org/html/rfc7523)).
-Thisgrant is very much like a client credentials grant as described in [RFC 6749 -
+This grant is very much like a client credentials grant as described in [RFC 6749 -
 OAuth 2.0](https://tools.ietf.org/html/rfc6749), except, rather than sending in a
 client_id and client_secret in order to obtain a token, the client must generate
 and self-sign a JWT, and send that JWT in the request-for-token. There are some
@@ -40,7 +40,7 @@ requirements on the JWT. It must:
 * include the client email as the issuer
 * specify "https://www.googleapis.com/oauth2/v4/token" as the audience
 * specify "https://www.googleapis.com/auth/logging.write" as the scope claim
-* expire within 300 seconds
+* expire within no more than 300 seconds
 * be signed with the client's private key.
 
 For example: 
@@ -105,10 +105,13 @@ Authorization: Bearer :token
 }
 ```
 
+What I have implemented in Apigee Edge policies is all of the control for what I described above.
+
 
 ## Required in Edge
 
-To support the management of tokens for use against Stackdriver, there are multiple artifacts required on the Apigee Edge side:
+To support the management of tokens for use against Stackdriver, there are
+multiple artifacts required on the Apigee Edge side:
 
  - encrypted KVM called "secrets1"
  - regular KVM called "settings1"
@@ -130,10 +133,9 @@ Here's a talk-through of how it works. Click the image to see the screencast:
 
 [![Youtube video: Setting up a Stackdriver Account](./images/screenshot-20170215-105158.png)](http://www.youtube.com/watch?v=7tkAkykALNs "Setting up a Stackdriver Account")
 
+### Part 2: Configuring Edge and Using the API Proxy
 
-### Part 2: Configuring Edge and using the API Proxy
-
-[![Youtube video: Using Stackdriver from Edge](./images/screenshot-20170214-115338.png)](http://www.youtube.com/watch?v=ozxELv8Z2G0 "Using Stackdriver from Edge")
+[![Youtube video: Using Stackdriver from Edge](./images/screenshot-20170214-115338.png)](http://www.youtube.com/watch?v=9QyxrVvGd_I "Using Stackdriver from Edge")
 
 
 ## How to use: First things first
