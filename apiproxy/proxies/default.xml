@@ -83,8 +83,14 @@
         <Condition>stackdriver.token = null</Condition>
       </Step>
       <Step>
-        <!-- finally, invoke stackdriver to emit a log message -->
+        <!-- finally, invoke Stackdriver to emit a log message using a JS Callout for async behavior -->
+        <Name>JS-Log-To-Stackdriver</Name>
+        <Condition>request.header.usesc = null</Condition>
+      </Step>
+      <Step>
+        <!-- or conditionally, invoke stackdriver with ServiceCallout to wait for a response-->
         <Name>SC-Log-To-Stackdriver</Name>
+        <Condition>request.header.usesc != null</Condition>
       </Step>
       <Step><Name>AM-CleanResponseHeaders</Name></Step>
     </Response>

@@ -212,6 +212,18 @@ curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
   -H content-type:application/json \
   -d '{ "payload" : "YOUR MESSAGE GOES HERE" }'
 ```
+This invokes Stackdriver via the httpClient from within a JavaScript callout. The httpClient does not wait for a response. This means a minimum of delay introduced into the proxy flow.
+
+To invoke the Stackdriver and wait for a response, we can use ServiceCallout. Like this:
+
+```
+curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
+  -H content-type:application/json \
+  -H useSC:true \
+  -d '{ "payload" : "This Message was Delivered via ServiceCallout" }'
+```
+
+You may see tens of ms difference between these two mechanisms. Check the trace UI for timings.  
 
 
 ## View the logs in Stackdriver
