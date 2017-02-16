@@ -1,4 +1,4 @@
-<Javascript name='JS-Log-To-Stackdriver' timeLimit='800'>
+<Javascript name='JS-Log-To-Stackdriver' timeLimit='400'>
   <Properties>
     <Property name='authz_header'>Bearer {stackdriver.token}</Property>
     <Property name='payload'>{
@@ -17,7 +17,6 @@
   ],
   "partialSuccess": true
 }</Property>
-    <Property name='not_endpoint2'>https://dc-echo.herokuapp.com/v2/entries:write</Property>
     <Property name='endpoint'>https://logging.googleapis.com/v2/entries:write</Property>
   </Properties>
   <ResourceURL>jsc://log-To-Stackdriver.js</ResourceURL>

@@ -68,6 +68,11 @@
         <Condition>stackdriver.token = null</Condition>
       </Step>
       <Step>
+        <!-- no token? adjust the expiry downward to be conservative with cache TTL -->
+        <Name>JS-Adjust-Expiry</Name>
+        <Condition>stackdriver.token = null</Condition>
+      </Step>
+      <Step>
         <!-- no token? check for failure (no new token) -->
         <Name>RF-No-AccessToken</Name>
         <Condition>(stackdriver.token = null) and (stackdriver.newtoken = null)</Condition>

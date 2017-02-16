@@ -8,6 +8,6 @@
     <!-- <KeyFragment ref='variable.containing.keyfrag' /> -->
   </CacheKey>
   <ExpirySettings>
-    <TimeoutInSec ref='stackdriver.expires_in'>3600</TimeoutInSec> <!-- 3600 = default -->
+    <TimeoutInSec ref='stackdriver.expires_in'>3540</TimeoutInSec> <!-- 3540 = 3600-60 = default ttl -->
   </ExpirySettings>
 </PopulateCache>
