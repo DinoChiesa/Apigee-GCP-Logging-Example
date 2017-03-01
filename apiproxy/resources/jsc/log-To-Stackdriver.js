@@ -4,7 +4,7 @@
 // Send a POST to stackdriver without waiting for a response.
 //
 // created: Wed Feb 15 16:28:55 2017
-// last saved: <2017-February-15 18:43:10>
+// last saved: <2017-February-28 09:50:26>
 
 var variableNameRe = "[^ \t\n\"',/\\\\]+?"; // non-greedy capture
 var varPrefixRe = '{';
@@ -28,8 +28,7 @@ function fillTemplate(template) {
   return template + ''; // coerce to JS String
 }
 
-
-// fire and forget?
+// fire and forget
 var payload = fillTemplate(properties.payload);
 var headers = {
       'Content-Type' : 'application/json',

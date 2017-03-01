@@ -89,7 +89,8 @@
       </Step>
       <Step>
         <!-- finally, invoke Stackdriver to emit a log message using a JS Callout for async behavior -->
-        <Name>JS-Log-To-Stackdriver</Name>
+        <!-- <Name>JS-Log-To-Stackdriver</Name> -->
+        <Name>JS-Log-To-Stackdriver-2</Name>
         <Condition>request.header.usesc = null</Condition>
       </Step>
       <Step>
@@ -103,6 +104,11 @@
 
   <Flows>
     <Flow name='test 1'>
+      <!--
+        curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
+          -H content-type:application/json \
+          -d '{ "payload" : "YOUR MESSAGE GOES HERE" }'
+      -->
       <Request>
         <Step>
           <Name>RF-InvalidContentType</Name>
