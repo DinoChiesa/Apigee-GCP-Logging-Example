@@ -1,15 +1,14 @@
 # Stackdriver demo proxy
 
-This API Proxy shows how to do logging from Edge to Stackdriver using
-built-in policies, plus the JWT Generator callout.
+This repo includes two distinct API Proxy bundles showing how to do logging from Apigee Edge to Google Stackdriver.
 
 ## What is Stackdriver?
 
-[Stackdriver](https://stackdriver) is a SaaS for logging, monitoring, and
+[Stackdriver](https://cloud.google.com/stackdriver/) is a SaaS for logging, monitoring, and
 alerting. It started as an independent company but was acquired by Google in 2014,
 and is now part of the Google Cloud Platform (as is Apigee Edge). Stackdriver
 exposes a REST API to allow systems or applications to write log messages into the
-Stackdriver log.  There is a UI for viewing the messages, configuring alerts on
+Stackdriver log. There is a UI for viewing the messages, configuring alerts on
 the messages, and so on.
 
 ## How does Stackdriver complement Apigee Edge?
@@ -21,21 +20,21 @@ listeners. For example, Splunk has a syslog listener that will accept inbound
 messages from a MessageLogging policy configured in Apigee Edge.
 
 But some people don't like the expense of Splunk, and are considering using the
-Google Cloud Platform.  This example shows how you can use Stackdriver, part of
+Google Cloud Platform. This example shows how you can use Stackdriver, part of
 GCP, to collect and aggregate log messages from Edge, using built-in policies.
 
 ## How it works
 
 The Stackdriver API supports OAuth 2.0 for inbound API calls to write (or read, or
-query) log messages. For our purposes, we want Apigee Edge to only write messages.
-The OAuth token is a standard bearer token, and Google dispenses the token via an
-RFC7523 grant (see [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client
-Authentication and Authorization Grants](https://tools.ietf.org/html/rfc7523)).
-This grant is very much like a client credentials grant as described in [RFC 6749 -
-OAuth 2.0](https://tools.ietf.org/html/rfc6749), except, rather than sending in a
-client_id and client_secret in order to obtain a token, the client must generate
-and self-sign a JWT, and send that JWT in the request-for-token. There are some
-requirements on the JWT. It must:
+query) log messages. For our purposes, we want Apigee Edge to only write messages.  The
+OAuth token is a standard bearer token, and Google dispenses the token via an RFC7523
+grant (see [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication
+and Authorization Grants](https://tools.ietf.org/html/rfc7523)).  This grant is very
+much like a client credentials grant as described in [RFC 6749 - OAuth
+2.0](https://tools.ietf.org/html/rfc6749), except, rather than sending in a client_id
+and client_secret in order to obtain a token, the client must generate and self-sign a
+JWT, and send that JWT in the request-for-token. There are some requirements on the
+JWT. It must:
 
 * include the client email as the issuer
 * specify "https://www.googleapis.com/oauth2/v4/token" as the audience
@@ -43,7 +42,7 @@ requirements on the JWT. It must:
 * expire within no more than 300 seconds
 * be signed with the client's private key.
 
-For example: 
+For example:
 
 ```json
 {"alg":"RS256","typ":"JWT"}
@@ -77,7 +76,7 @@ like this:
 }
 ```
 
-That access token can then be used against the Stackdriver APIs. 
+That access token can then be used against the Stackdriver APIs.
 
 The point here is that a system that logs to Stackdriver must obtain and cache the access token, and must be able to obtain new access tokens on expiry.
 
@@ -105,8 +104,16 @@ Authorization: Bearer :token
 }
 ```
 
-What I have implemented in Apigee Edge policies is all of the control for what I described above.
+The examples here are API Proxies that perform all of the above.
 
+## What's Included?
+
+There are two versions of the API Proxy included here.
+
+* [stackdriver-1](./bundles/inline-token-refresh) refreshes the access_token for stackdriver inline with respect to the API request;
+* [stackdriver-2](./bundles/asynchronous-token-refresh-via-nodejs) maintains an asynchronous job to do the token refreshing.
+
+Both log to stackdriver either via the ServiceCallout or the JavaScript callout.
 
 ## Required in Edge
 
@@ -119,10 +126,10 @@ multiple artifacts required on the Apigee Edge side:
 
 All environment-scoped.
 
-The secrets1 KVM stores the private key of the client (the service account), which
-is used to sign the JWT required to get each new access token.  The cache stores
-the access token for its lifetime.  And the other KVM stores other
-stackdriver-related settings, like the project ID and so on.
+The secrets1 KVM stores the private key of the client (the service account), which is
+used to sign the JWT required to get each new access token.  The cache stores the access
+token for its lifetime. And the other KVM stores other stackdriver-related settings,
+like the project ID and so on.
 
 
 ## Some Screencasts to guide you
@@ -141,23 +148,13 @@ Here's a talk-through of how it works. Click the image to see the screencast:
 ## How to use: First things first
 
 This is covered in the "Part 1" screencast above.  Go to
-[stackdriver](https://stackdriver.com), and set up a project; select a unique
-project id.  Also, using [the Google API
-console](https://console.cloud.google.com/apis), enable the project for the
-Stackdriver APIs.  Finally, using [the service accounts management
-page](https://console.developers.google.com/iam-admin/serviceaccounts), create a
-service account, generate a new private key for the service account, and save the
-private key to a JSON file.  All of this is shown in the screencast.
+[Stackdriver](https://cloud.google.com/stackdriver/) , and set up a project; select a unique
+project id.  Also, using [the Google API console](https://console.cloud.google.com/apis),
+enable the project for the Stackdriver APIs.  Finally, using [the service accounts
+management page](https://console.developers.google.com/iam-admin/serviceaccounts), create a
+service account, generate a new private key for the service account, and save the private
+key to a JSON file.  All of this is shown in the screencast.
 
-
-## Installing node libraries
-
-The tools use Node, and rely on various NPM libraries. So before you use them you will need to install the libraries:
-
-```
-cd tools
-npm install
-```
 
 
 ## Setting up the KVMs and Cache
@@ -177,35 +174,48 @@ The JSON file contains information such as:
 * the PEM-encoded private key you got from Stackdriver
 * the issuer, or email of the service account you got from Stackdriver
 
-
-Example:
+Before you start you must install the node libraries.
 ```
-node ./tools/provisionKvmAndCache.js  -n -o cap500 -e test \
+cd tools
+npm install
+```
+
+Example (running from the tools directory):
+```
+node ./provisionKvmAndCache.js  -n -o ORGNAME -e ENVNAME \
     -J ~/dev/stackdriver/project-apigee-edge-0bb2933e52e4.json
 ```
 
-There are some optional parameters to this script as well, but you probably won't need them.
+There are some optional parameters to this script as well, but don't use them unless you know what you're getting into.
 Make sure everything succeeds.
 
 
 ## Importing and Deploying the Proxy
 
-After provisioning the KVMs and Cache, you also need to import and deploy the proxy.  To do so, run the
-[importAndDeployProxy.js](./tools/importAndDeployProxy.js) script. Again, specify the Edge organization and environment.
+After provisioning the KVMs and Cache, you also need to import and deploy one or both of the proxies.  To do so, run the
+[importAndDeploy.js](./tools/importAndDeploy.js) script. Again, specify the Edge organization and environment.
 
+To deploy stackdriver-2:
 ```
-node ./tools/importAndDeployProxy.js -n -o cap500 -e test
+node ./importAndDeploy.js -n -v -o ORGNAME -e ENVNAME -d ../bundles/asynchronous-token-refresh-via-nodejs
 ```
 
-There are some optional parameters; you probably won't need them.
+Note: replace ORGNAME and ENVNAME with the name of your organization and environment.
 
-Everything should succeed. If not, then check if
-the cache or KVMs were not properly configured.
+To deploy stackdriver-1:
+```
+node ./importAndDeploy.js -n -v -o ORGNAME -e ENVNAME -d ../bundles/inline-token-refresh
+```
+
+There are some optional parameters to that script; you probably won't need them.
+
+Everything should succeed. If not, then check if the cache or KVMs were properly
+configured.
 
 
 ## Invoking the Proxy
 
-After you've provisioned the KVM and cache, and then imported and deployed the proxy, you should be able to invoke it.  Here's a sample call:
+After you've provisioned the KVM and cache, and then imported and deployed the proxy, you should be able to invoke it.  Here's a sample call invoking the API proxy that does "inline" token refreshing:
 
 ```
 curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
@@ -214,7 +224,7 @@ curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
 ```
 This invokes Stackdriver via the httpClient from within a JavaScript callout. The httpClient does not wait for a response. This means a minimum of delay introduced into the proxy flow.
 
-To invoke the Stackdriver and wait for a response, we can use ServiceCallout. Like this:
+To invoke the API that logs to Stackdriver and waits for a response, we can use ServiceCallout. Like this:
 
 ```
 curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
@@ -225,20 +235,34 @@ curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
 
 You may see tens of ms difference between these two mechanisms. Check the trace UI for timings.
 
+To use the version of the API Proxy that uses asynchronous refresh of the token, use this:
+```
+curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-2/t1 \
+  -H content-type:application/json \
+  -d '{ "payload" : "YOUR MESSAGE GOES HERE" }'
+```
+
 
 ## View the logs in Stackdriver
 
 Then, open [the Stackdriver logviewer webapp](https://console.cloud.google.com/logs/viewer) to view the log messages:
+You need to select "Produced API" in the dropdown.
 
 ![Youtube video: Using Stackdriver from Edge](./images/screenshot-20170214-120451.png)
 
-
 ## Dependencies
 
-This project depends on the JAR from the JWT Generator callout that is available
-[here](https://github.com/apigee/iloveapis2015-jwt-jwe-jws).  I've just included
-the binary JAR.  If for some reason you want to re-build the JAR from source, see
-that repo.
+One of the API Proxy bundles included here depends on the JAR from the JWT Generator
+callout that is available [here](https://github.com/apigee/iloveapis2015-jwt-jwe-jws).
+I've just included the binary JAR.  If for some reason you want to re-build the JAR from
+source, see that repo.
+
+
+## Notes
+
+Unfortunately the security settings have changed on Apigee Edge SaaS since the original
+publication of this repo. The version of the API Proxy that uses the JWT callout JAR
+will no longer work correctly. The other API Proxy still works.
 
 
 ## License

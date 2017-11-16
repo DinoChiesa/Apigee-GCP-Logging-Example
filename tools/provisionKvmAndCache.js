@@ -2,18 +2,19 @@
 /*jslint node:true */
 // provisionKvmAndCache.js
 // ------------------------------------------------------------------
-// provision the KVMs and cache for the example API proxy that logs to
+// provision the KVMs and cache for the example API proxies that log to
 // stackdriver.
 //
-// last saved: <2017-February-15 14:13:06>
+// last saved: <2017-November-15 18:52:04>
 
 var fs = require('fs'),
-    common = require('./lib/utility.js'),
+    edgejs = require('apigee-edge-js'),
+    common = edgejs.utility,
+    apigeeEdge = edgejs.edge,
     sprintf = require('sprintf-js').sprintf,
-    async = require('async'),
-    apigeeEdge = require('./lib/edge.js'),
     Getopt = require('node-getopt'),
-    version = '20170215-0934',
+    async = require('async'),
+    version = '20171115-1842',
     stackdriverJson,
     defaults = { secretsmap : 'secrets1', settingsmap: 'settings1', cache: 'cache1', logid: 'syslog' },
     getopt = new Getopt(common.commonOptions.concat([
@@ -69,7 +70,7 @@ if ( !opt.options.cache ) {
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-function loadDataIntoMaps(cb) {
+function loadDataIntoMaps(org, cb) {
   // var re = new RegExp('(?:\r\n|\r|\n)', 'g');
   // var pemString = fs.readFileSync(opt.options.privkeypem, 'utf8').replace(re,'\\n');
   var pemString = stackdriverJson.private_key;
@@ -79,21 +80,21 @@ function loadDataIntoMaps(cb) {
         key: 'stackdriver.privKeyPem',
         value: pemString
       };
-  common.logWrite(sprintf('loading PEM %s into %s', opt.options.privkeypem, opt.options.secretsmap));
-  apigeeEdge.putKvm(options, function(e, result){
+  common.logWrite(sprintf('loading PEM into %s', opt.options.secretsmap));
+  org.kvms.put(options, function(e, result){
     if (e) return cb(e, result);
     options.kvm = opt.options.settingsmap;
     options.key = 'stackdriver.projectid';
     options.value = stackdriverJson.project_id;
-    apigeeEdge.putKvm(options, function(e, result){
+    org.kvms.put(options, function(e, result){
       if (e) return cb(e, result);
       options.key = 'stackdriver.logid';
       options.value = opt.options.logid;
-      apigeeEdge.putKvm(options, function(e, result){
+      org.kvms.put(options, function(e, result){
         if (e) return cb(e, result);
         options.key = 'stackdriver.jwt_issuer';
         options.value = stackdriverJson.client_email;
-        apigeeEdge.putKvm(options, function(e, result){
+        org.kvms.put(options, function(e, result){
           if (e) return cb(e, result);
           cb(null, result);
         });
@@ -102,36 +103,41 @@ function loadDataIntoMaps(cb) {
   });
 }
 
-function kvmsLoadedCb(e, result){
-  if (e) {
-    console.log(e);
-    console.log(e.stack);
-    process.exit(1);
-  }
-  common.logWrite('ok. the KVMs were loaded successfully.');
-  return checkAndCreateCache(function(e, result){
+
+
+function kvmsLoadedCb(org) {
+  return function(e, result) {
     if (e) {
-      console.log(e);
+    common.logWrite(JSON.stringify(e, null, 2));
       console.log(e.stack);
       process.exit(1);
     }
-    common.logWrite('ok. the cache exists.');
-  });
+    common.logWrite('ok. the KVMs were loaded successfully.');
+    checkAndCreateCache(org, function(e, result){
+      if (e) {
+    common.logWrite(JSON.stringify(e, null, 2));
+        console.log(e.stack);
+        process.exit(1);
+      }
+      common.logWrite('ok. the cache exists.');
+    });
+  };
 }
 
-function checkAndCreateCache(cb) {
-  apigeeEdge.getCaches({ env: opt.options.env }, function(e, result){
+
+function checkAndCreateCache(org, cb) {
+  org.caches.get({ env: opt.options.env }, function(e, result){
     if (e) {
-      console.log(e);
+      common.logWrite(JSON.stringify(e, null, 2));
       console.log(e.stack);
       process.exit(1);
     }
     if (result.indexOf(opt.options.cache) == -1) {
-      apigeeEdge.createCache({ env: opt.options.env, name: opt.options.cache},
-                             function(e, result){
-                               if (e) return cb(e);
-                               cb(null, opt.options.cache);
-                             });
+      org.caches.create({ env: opt.options.env, name: opt.options.cache},
+                        function(e, result){
+                          if (e) return cb(e);
+                          cb(null, opt.options.cache);
+                        });
     }
     else {
       return cb(null, opt.options.cache);
@@ -139,53 +145,64 @@ function checkAndCreateCache(cb) {
   });
 }
 
-function createOneKvm(mapname, cb) {
-  // create KVM.  Use encrypted if it is for secrets.
-  apigeeEdge.createKvm({ env: opt.options.env, name: mapname, encrypted:(mapname == opt.options.secretsmap)},
-                       function(e, result){
-                         if (e) return cb(e);
-                         cb(null, mapname);
-                       });
+function createOneKvm(org) {
+  return function (mapname, cb) {
+    // create KVM.  Use encrypted if it is for secrets.
+    org.kvms.create({ env: opt.options.env, name: mapname, encrypted:(mapname == opt.options.secretsmap)},
+                    function(e, result){
+                      if (e) return cb(e);
+                      cb(null, mapname);
+                    });
+  };
 }
+
 
 function dedupe(e, i, c) { // extra step to remove duplicates
   return c.indexOf(e) === i;
 }
 
-apigeeEdge.setEdgeConnection(opt.options.mgmtserver, opt.options.org, {
-  headers : { accept: 'application/json' },
-  auth : {
-    user: opt.options.username,
-    pass: opt.options.password,
-    sendImmediately : true
-  }});
+var options = {
+      mgmtServer: opt.options.mgmtserver,
+      org : opt.options.org,
+      user: opt.options.username,
+      password: opt.options.password,
+      verbosity: opt.options.verbose || 0
+    };
 
-
-apigeeEdge.getKvms({ env: opt.options.env }, function(e, result){
+apigeeEdge.connect(options, function(e, org) {
   if (e) {
-    console.log(e);
-    console.log(e.stack);
+    common.logWrite(JSON.stringify(e, null, 2));
     process.exit(1);
   }
+  common.logWrite('connected');
 
-  var missingMaps = [opt.options.settingsmap, opt.options.secretsmap]
-    .filter(function(value) { return result.indexOf(value) == -1; })
-    .filter(dedupe);
+  org.kvms.get({ env: opt.options.env }, function(e, result){
+    if (e) {
+      common.logWrite(JSON.stringify(e, null, 2));
+      console.log(e.stack);
+      process.exit(1);
+    }
 
-  if (missingMaps && missingMaps.length > 0){
-    common.logWrite('Need to create one or more maps');
-    async.mapSeries(missingMaps, createOneKvm, function(e, results) {
-      if (e) {
-        console.log(e);
-        console.log(e.stack);
-        process.exit(1);
-      }
-      //console.log(JSON.stringify(results, null, 2) + '\n');
-      loadDataIntoMaps(kvmsLoadedCb);
-    });
-  }
-  else {
-    common.logWrite('ok. the required maps exist');
-    loadDataIntoMaps(kvmsLoadedCb);
-  }
+    var missingMaps = [opt.options.settingsmap, opt.options.secretsmap]
+      .filter(function(value) { return result.indexOf(value) == -1; })
+      .filter(dedupe);
+
+    if (missingMaps && missingMaps.length > 0){
+      common.logWrite('Need to create one or more maps');
+      async.mapSeries(missingMaps, createOneKvm(org), function(e, results) {
+        if (e) {
+          common.logWrite(JSON.stringify(e, null, 2));
+          console.log(e.stack);
+          process.exit(1);
+        }
+        //console.log(JSON.stringify(results, null, 2) + '\n');
+        loadDataIntoMaps(org, kvmsLoadedCb(org));
+      });
+    }
+    else {
+      common.logWrite('ok. the required maps exist');
+      loadDataIntoMaps(org, kvmsLoadedCb(org));
+    }
+  });
+
 });
