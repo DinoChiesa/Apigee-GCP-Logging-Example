@@ -1,0 +1,14 @@
+<AssignMessage name='AM-Success'>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <Set>
+    <Payload contentType='application/json'>{
+  "status" : true,
+  "logpayload" : "{stackdriver.logpayload}",
+  "timestamp" : "{system.timestamp}"
+}
+</Payload>
+    <StatusCode>200</StatusCode>
+    <ReasonPhrase>OK</ReasonPhrase>
+  </Set>
+
+</AssignMessage>

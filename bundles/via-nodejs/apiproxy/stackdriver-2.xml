@@ -1,0 +1,12 @@
+<APIProxy revision='1' name='stackdriver-2'>
+  <ConfigurationVersion minorVersion='0' majorVersion='4'/>
+  <CreatedAt>1487034926488</CreatedAt>
+  <CreatedBy>dino</CreatedBy>
+  <Description></Description>
+  <DisplayName>stackdriver-2</DisplayName>
+  <LastModifiedAt>1488305505770</LastModifiedAt>
+  <LastModifiedBy>orgAdmin</LastModifiedBy>
+  <TargetEndpoints>
+    <TargetEndpoint>default</TargetEndpoint>
+  </TargetEndpoints>
+</APIProxy>

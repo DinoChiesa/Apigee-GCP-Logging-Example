@@ -1,0 +1,7 @@
+<AssignMessage name='AM-CleanResponseHeaders'>
+  <Remove>
+    <Headers/>
+  </Remove>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <AssignTo createNew='false' transport='http' type='response'/>
+</AssignMessage>

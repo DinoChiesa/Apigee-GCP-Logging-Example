@@ -1,0 +1,24 @@
+<TargetEndpoint name='node'>
+  <Description>nodejs target endpoint</Description>
+  <FaultRules>
+  </FaultRules>
+
+  <Flows/>
+  <PreFlow name='PreFlow'>
+    <Request>
+    </Request>
+    <Response>
+    </Response>
+  </PreFlow>
+
+  <ScriptTarget>
+      <ResourceURL>node://tokenMaintenance.js</ResourceURL>
+      <EnvironmentVariables>
+          <EnvironmentVariable name="NAME">VALUE</EnvironmentVariable>
+      </EnvironmentVariables>
+      <Arguments>
+          <Argument>ARG</Argument>
+      </Arguments>
+  </ScriptTarget>
+
+</TargetEndpoint>

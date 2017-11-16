@@ -1,0 +1,30 @@
+<Javascript name='JS-Log-To-Stackdriver-2' timeLimit='400'>
+  <Properties>
+    <Property name='authz_header'>Bearer {stackdriver-access-token}</Property>
+    <Property name='payload'>{
+  "logName": "projects/{stackdriver.projectid}/logs/{stackdriver.logid}",
+  "resource" : {
+    "type": "api",
+    "labels": {
+      "location" : "{client.scheme}://{request.header.host}{request.uri}",
+      "method"  : "{request.verb}",
+      "service" : "{organization.name}/{environment.name}/{apiproxy.name}",
+      "version" : "{apiproxy.revision}"
+    }
+  },
+  "labels": {
+      "flavor": "test",
+      "sender": "JS"
+  },
+  "entries": [{
+      "severity" : "INFO",
+      "textPayload" : "{stackdriver.logpayload}"
+     }
+  ],
+  "partialSuccess": true
+}</Property>
+    <Property name='endpoint'>https://logging.googleapis.com/v2/entries:write</Property>
+  </Properties>
+  <IncludeURL>jsc://messageTemplate.js</IncludeURL>
+  <ResourceURL>jsc://log-To-Stackdriver-2.js</ResourceURL>
+</Javascript>

@@ -1,0 +1,40 @@
+<ServiceCallout name='SC-Log-To-Stackdriver'>
+  <Request>
+    <Set>
+      <Headers>
+        <Header name='authorization'>Bearer {stackdriver-access-token}</Header>
+      </Headers>
+      <Payload contentType='application/json'>{
+  "logName": "projects/{stackdriver.projectid}/logs/{stackdriver.logid}",
+  "resource" : {
+    "type": "api",
+    "labels": {
+      "location" : "{client.scheme}://{request.header.host}{request.uri}",
+      "method"  : "{request.verb}",
+      "service" : "{organization.name}/{environment.name}/{apiproxy.name}",
+      "version" : "{apiproxy.revision}"
+    }
+  },
+  "labels": {
+      "flavor": "test",
+      "sender": "SC"
+  },
+  "entries": [{
+      "severity" : "INFO",
+      "textPayload" : "{stackdriver.logpayload}"
+     }
+  ],
+  "partialSuccess": true
+}
+</Payload>
+      <Verb>POST</Verb>
+    </Set>
+  </Request>
+  <Response>logResponse</Response>
+  <HTTPTargetConnection>
+    <Properties>
+      <Property name='success.codes'>2xx, 3xx</Property>
+    </Properties>
+    <URL>https://logging.googleapis.com/v2/entries:write</URL>
+  </HTTPTargetConnection>
+</ServiceCallout>
