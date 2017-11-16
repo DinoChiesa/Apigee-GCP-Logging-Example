@@ -1,7 +1,7 @@
 # Stackdriver demo proxy
 
 This API Proxy shows how to do logging from Edge to Stackdriver using
-built-in policies, plus the JWT Generator callout. 
+built-in policies, plus the JWT Generator callout.
 
 ## What is Stackdriver?
 
@@ -171,7 +171,7 @@ tools directory. For this you need to specify:
 * name of Edge organization and environment
 * the JSON file that you download from Stackdriver
 
-The JSON file contains information such as: 
+The JSON file contains information such as:
 
 * Stackdriver project id
 * the PEM-encoded private key you got from Stackdriver
@@ -180,8 +180,8 @@ The JSON file contains information such as:
 
 Example:
 ```
-node ./tools/provisionKvmAndCache.js  -n -o cap500 -e test \ 
-    -J ~/dev/stackdriver/project-apigee-edge-0bb2933e52e4.json  
+node ./tools/provisionKvmAndCache.js  -n -o cap500 -e test \
+    -J ~/dev/stackdriver/project-apigee-edge-0bb2933e52e4.json
 ```
 
 There are some optional parameters to this script as well, but you probably won't need them.
@@ -190,22 +190,22 @@ Make sure everything succeeds.
 
 ## Importing and Deploying the Proxy
 
-After provisioning the KVMs and Cache, you also need to import and deploy the proxy.  To do so, run the 
+After provisioning the KVMs and Cache, you also need to import and deploy the proxy.  To do so, run the
 [importAndDeployProxy.js](./tools/importAndDeployProxy.js) script. Again, specify the Edge organization and environment.
 
 ```
-node ./tools/importAndDeployProxy.js -n -o cap500 -e test 
+node ./tools/importAndDeployProxy.js -n -o cap500 -e test
 ```
 
 There are some optional parameters; you probably won't need them.
 
-Everything should succeed. If not, then check if 
+Everything should succeed. If not, then check if
 the cache or KVMs were not properly configured.
 
 
 ## Invoking the Proxy
 
-After you've provisioned the KVM and cache, and then imported and deployed the proxy, you should be able to invoke it.  Here's a sample call: 
+After you've provisioned the KVM and cache, and then imported and deployed the proxy, you should be able to invoke it.  Here's a sample call:
 
 ```
 curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
@@ -223,7 +223,7 @@ curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
   -d '{ "payload" : "This Message was Delivered via ServiceCallout" }'
 ```
 
-You may see tens of ms difference between these two mechanisms. Check the trace UI for timings.  
+You may see tens of ms difference between these two mechanisms. Check the trace UI for timings.
 
 
 ## View the logs in Stackdriver
@@ -243,6 +243,6 @@ that repo.
 
 ## License
 
-This material is copyright 2017 Google Inc.  and is licensed under the [Apache 2.0
+This material is Copyright 2017 Google Inc.  and is licensed under the [Apache 2.0
 License](LICENSE). This includes the the API Proxy configuration as well as the
 nodejs tools and libraries.
