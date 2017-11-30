@@ -5,7 +5,7 @@
 // It refreshes the GCP oauth token periodically, outside of the scope of any particular API request.
 //
 // created: Wed Nov 15 10:45:33 2017
-// last saved: <2017-November-15 17:48:11>
+// last saved: <2017-November-30 08:53:43>
 
 if ( ! Error) {
   function Error() {};
@@ -43,19 +43,23 @@ function getToken(cb) {
   var timeUntilNextRun;
   console.log('getToken: hello.');
   cache.get(constants.cachekeys.tokenExpiry, function(e, expiryTimeInSeconds) {
-    console.log('getToken: expiryTime (%s) now(%d)', expiryTimeInSeconds, nowInSeconds);
+    console.log('getToken: expiryTime(%s) now(%d)', expiryTimeInSeconds, nowInSeconds);
     expiryTimeInSeconds = (e) ? 0 : (expiryTimeInSeconds ? parseInt(expiryTimeInSeconds, 10) : 0);
     var remainingTimeInSeconds = (expiryTimeInSeconds === 0 )? 0 : Math.abs(expiryTimeInSeconds - nowInSeconds);
-    console.log('getToken: remainingTime (%d)', remainingTimeInSeconds);
+    console.log('getToken: remainingTime(%d)', remainingTimeInSeconds);
     if (expiryTimeInSeconds === 0 || remainingTimeInSeconds < constants.notMuchTimeInSeconds) {
       console.log('getToken: generating new token');
       kvmSecrets.get(constants.kvmkeys.privKeyPem, function(e, privKeyPem) {
         if (e) {
-          return console.log('getToken: cannot read kvm. ' + e);
+          console.log('getToken: cannot read kvm(A). ' + e);
+          if (typeof cb == 'function') cb(e);
+          return;
         }
         kvmSettings.get(constants.kvmkeys.jwtIssuer, function(e, jwtIssuer) {
           if (e) {
-            return console.log('getToken: cannot read kvm. ' + e);
+            console.log('getToken: cannot read kvm(B). ' + e);
+            if (typeof cb == 'function') cb(e);
+            return;
           }
           // example jwt payload = {
           //   iss:"service-account-1@project-name-here.iam.gserviceaccount.com",
@@ -73,9 +77,19 @@ function getToken(cb) {
                 exp: nowInSeconds + (3 * 60)
               };
 
-          console.log('getToken: JWT payload: ' + JSON.stringify(payload, null, 2));
-          // sign with RSA SHA256
-          var token = jwt.sign(payload, privKeyPem, { algorithm: 'RS256'});
+          console.log('getToken: JWT payload: ' + JSON.stringify(payload));
+
+          var token;
+          try {
+            // sign with RSA SHA256
+            token = jwt.sign(payload, privKeyPem, { algorithm: 'RS256'});
+          }
+          catch (exc1) {
+            // could happen if PEM is malformed
+            console.log('Exception during sign: ' + exc1);
+            if (typeof cb == 'function') cb(exc1);
+            return;
+          }
 
           var requestOptions = {
                 url: constants.audience,
@@ -89,6 +103,7 @@ function getToken(cb) {
                 }
               };
 
+          console.log('getToken: encoded JWT: %s...',  token.substring(0, 45));
           request(requestOptions, function(error, httpResponse, body){
             if (error) {
               console.log('getToken: error requesting token: ' + error);
@@ -103,19 +118,20 @@ function getToken(cb) {
                 if (e) {
                   console.log('getToken: error caching token: ' + e);
                   if (typeof cb == 'function') cb(e);
+                  return;
                 }
-                else {
+
                   var expiryTimeInSeconds = Math.abs(nowInSeconds + body.expires_in).toFixed(0);
                   cache.put(constants.cachekeys.tokenExpiry, expiryTimeInSeconds, cacheTTL_inSeconds, function(e) {
                     currentToken = body.access_token;
-                    console.log('getToken: token has been cached');
                     timeUntilNextRun = Math.floor(1000 * (cacheTTL_inSeconds - constants.notMuchTimeInSeconds));
+                    console.log('getToken: token has been cached. sleeping (%d) seconds', Math.floor(timeUntilNextRun / 1000));
                     setTimeout(getToken, timeUntilNextRun);
                     if (typeof cb == 'function') {
                       cb(null, body.access_token);
                     }
                   });
-                }
+
               });
             }
           });
@@ -123,8 +139,8 @@ function getToken(cb) {
       });
     }
     else {
-      console.log('getToken: not generating new token - already current');
       timeUntilNextRun = 1000 * (remainingTimeInSeconds - 120);
+      console.log('getToken: not generating new token - already current. sleeping (%d) seconds', Math.floor(timeUntilNextRun / 1000));
       setTimeout(getToken, timeUntilNextRun);
     }
   });
