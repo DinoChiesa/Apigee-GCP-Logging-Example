@@ -5,7 +5,7 @@
 // provision the KVMs and cache for the example API proxies that log to
 // stackdriver.
 //
-// last saved: <2017-December-06 12:34:26>
+// last saved: <2017-December-06 12:36:46>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -24,7 +24,7 @@ var fs = require('fs'),
       ['S' , 'settingsmap=ARG', 'optional. name of the KVM in Edge for other non-secret settings. Will be created if nec. Default: ' + defaults.settingsmap],
       ['J' , 'privkeyjson=ARG', 'required. stackdriver JSON private key file.'],
       ['L' , 'logid=ARG', 'optional. stackdriver log id for logging. Default: ' + defaults.logid],
-      ['N' , 'notoken', 'optional. do not try to get a authentication token.']
+      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
     ])).bindHelp();
 
 // ========================================================
