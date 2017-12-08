@@ -2,6 +2,12 @@
 
 This repo includes two distinct API Proxy bundles showing how to do logging from Apigee Edge to Google Stackdriver.
 
+
+## Disclaimer
+
+This example is not an official Google product, nor is it part of an official Google product. 
+If you have questions on using it, please ask  via github or community.apigee.com .
+
 ## What is Stackdriver?
 
 [Stackdriver](https://cloud.google.com/stackdriver/) is a SaaS for logging, monitoring, and
