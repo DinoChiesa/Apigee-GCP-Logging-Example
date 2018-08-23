@@ -1,0 +1,20 @@
+<KeyValueMapOperations name='KVM-Get-Stackdriver-Settings' mapIdentifier='settings1'>
+  <Scope>environment</Scope>
+  <ExpiryTimeInSecs>30</ExpiryTimeInSecs>
+  <!-- these gets will be cached -->
+  <Get assignTo='stackdriver.projectid'>
+    <Key>
+      <Parameter>stackdriver.projectid</Parameter>
+    </Key>
+  </Get>
+  <Get assignTo='stackdriver.logid'>
+    <Key>
+      <Parameter>stackdriver.logid</Parameter>
+    </Key>
+  </Get>
+  <Get assignTo='stackdriver.jwt_issuer'>
+    <Key>
+      <Parameter>stackdriver.jwt_issuer</Parameter>
+    </Key>
+  </Get>
+</KeyValueMapOperations>

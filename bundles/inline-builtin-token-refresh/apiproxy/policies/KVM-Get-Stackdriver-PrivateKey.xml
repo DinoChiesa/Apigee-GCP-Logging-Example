@@ -1,0 +1,8 @@
+<KeyValueMapOperations name='KVM-Get-Stackdriver-PrivateKey' mapIdentifier='secrets1'>
+  <Scope>environment</Scope>
+  <Get assignTo='private.stackdriver.privKeyPem'>
+    <Key>
+      <Parameter>stackdriver.privKeyPem</Parameter>
+    </Key>
+  </Get>
+</KeyValueMapOperations>

@@ -1,0 +1,13 @@
+<PopulateCache name='Cache-Put-Stackdriver-Token'>
+  <CacheResource>cache1</CacheResource>
+  <Scope>Application</Scope>
+  <Source>stackdriver.newtoken</Source>
+  <CacheKey>
+    <!-- <Prefix>stackdriver.token</Prefix> -->
+    <KeyFragment>stackdriver.token</KeyFragment>
+    <!-- <KeyFragment ref='variable.containing.keyfrag' /> -->
+  </CacheKey>
+  <ExpirySettings>
+    <TimeoutInSec ref='stackdriver.expires_in'>3540</TimeoutInSec> <!-- 3540 = 3600-60 = default ttl -->
+  </ExpirySettings>
+</PopulateCache>

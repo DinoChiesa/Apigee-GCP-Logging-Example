@@ -1,7 +1,7 @@
 // messageTemplate.js
 // ------------------------------------------------------------------
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 // limitations under the License.
 //
 // created: Wed Feb 15 16:28:55 2017
-// last saved: <2017-December-08 13:25:03>
+// last saved: <2018-August-20 10:06:26>
 //
 // A simple object that performs message templating.
 // Accepts a string that includes patterns like {foo_bar} and replaces

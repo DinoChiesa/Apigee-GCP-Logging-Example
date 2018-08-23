@@ -3,7 +3,7 @@
 //
 // Send a POST to stackdriver without waiting for a response.
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 // limitations under the License.
 //
 // created: Wed Feb 15 16:28:55 2017
-// last saved: <2017-December-08 13:24:54>
+// last saved: <2018-August-20 10:06:21>
 
 // fire and forget
 var payload = (new MessageTemplate(properties.payload)).fill();

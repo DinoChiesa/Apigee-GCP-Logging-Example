@@ -1,0 +1,16 @@
+<RaiseFault name='RF-No-AccessToken'>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <FaultResponse>
+    <Set>
+      <Payload contentType='application/json'>{
+  "error" : {
+    "code" : 500.01,
+    "message" : "No Access Token."
+  }
+}
+</Payload>
+      <StatusCode>500</StatusCode>
+      <ReasonPhrase>Server Error</ReasonPhrase>
+    </Set>
+  </FaultResponse>
+</RaiseFault>

@@ -5,7 +5,7 @@
 // provision the KVMs and cache for the example API proxies that log to
 // stackdriver.
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017-2018 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2017-December-08 13:27:04>
+// last saved: <2018-August-20 10:03:25>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),

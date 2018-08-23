@@ -1,0 +1,16 @@
+<GenerateJWT name='JWT-Generate-Stackdriver-token'>
+  <Algorithm>RS256</Algorithm>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+  <PrivateKey>
+    <Value ref="private.stackdriver.privKeyPem"/>
+  </PrivateKey>
+
+  <Issuer ref='stackdriver.jwt_issuer'/>
+  <Audience>https://www.googleapis.com/oauth2/v4/token</Audience>
+  <ExpiresIn>90s</ExpiresIn>
+
+  <AdditionalClaims>
+    <Claim name='scope'>https://www.googleapis.com/auth/logging.write</Claim>
+  </AdditionalClaims>
+  <OutputVariable>stackdriver_jwt</OutputVariable>
+</GenerateJWT>

@@ -1,0 +1,12 @@
+<ExtractVariables name='Extract-Stackdriver-AccessToken'>
+  <Source>tokenResponse</Source>
+  <VariablePrefix>stackdriver</VariablePrefix>
+  <JSONPayload>
+    <Variable name='newtoken'>
+      <JSONPath>$.access_token</JSONPath>
+    </Variable>
+    <Variable name='expires_in'>
+      <JSONPath>$.expires_in</JSONPath>
+    </Variable>
+  </JSONPayload>
+</ExtractVariables>

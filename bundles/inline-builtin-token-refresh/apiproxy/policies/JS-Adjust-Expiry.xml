@@ -1,0 +1,7 @@
+<Javascript name='JS-Adjust-Expiry' timeLimit='100'>
+  <Properties>
+    <Property name='ttlValueVar'>stackdriver.expires_in</Property>
+    <Property name='delta'>60</Property>
+  </Properties>
+  <ResourceURL>jsc://adjust-Expiry.js</ResourceURL>
+</Javascript>

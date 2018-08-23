@@ -4,7 +4,7 @@
 // nodejs code to do asynchronous token maintenance within an API Proxy.
 // It refreshes the GCP oauth token periodically, outside of the scope of any particular API request.
 //
-// Copyright 2017 Google Inc.
+// Copyright 2017 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 // limitations under the License.
 //
 // created: Wed Nov 15 10:45:33 2017
-// last saved: <2017-December-08 13:24:40>
+// last saved: <2018-August-20 10:06:00>
 
 if ( ! Error) {
   function Error() {};
