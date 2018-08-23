@@ -2,10 +2,9 @@
 
 This repo includes two distinct API Proxy bundles showing how to do logging from Apigee Edge to Google Stackdriver.
 
-
 ## Disclaimer
 
-This example is not an official Google product, nor is it part of an official Google product. 
+This example is not an official Google product, nor is it part of an official Google product.
 If you have questions on using it, please ask  via github or community.apigee.com .
 
 ## What is Stackdriver?
@@ -48,7 +47,7 @@ JWT. It must:
 * expire within no more than 300 seconds
 * be signed with the client's private key.
 
-For example:
+Example payload:
 
 ```json
 {"alg":"RS256","typ":"JWT"}
@@ -114,12 +113,13 @@ The examples here are API Proxies that perform all of the above.
 
 ## What's Included?
 
-There are two versions of the API Proxy included here.
+There are three versions of the API Proxy included here.
 
-* [stackdriver-1](./bundles/inline-token-refresh) refreshes the access_token for stackdriver inline with respect to the API request;
+* [stackdriver-1](./bundles/inline-token-refresh) refreshes the access_token for stackdriver inline with respect to the API request, using the Java callout;
+* [stackdriver-1a](./bundles/inline-token-refresh) refreshes the access_token for stackdriver inline with respect to the API request, using the GenerateJWT policy;
 * [stackdriver-2](./bundles/asynchronous-token-refresh-via-nodejs) maintains an asynchronous job to do the token refreshing.
 
-Both log to stackdriver either via the ServiceCallout or the JavaScript callout.
+All log to stackdriver either via the ServiceCallout or the JavaScript callout.
 
 ## Required in Edge
 
@@ -208,10 +208,8 @@ node ./importAndDeploy.js -n -v -o ORGNAME -e ENVNAME -d ../bundles/asynchronous
 
 Note: replace ORGNAME and ENVNAME with the name of your organization and environment.
 
-To deploy stackdriver-1:
-```
-node ./importAndDeploy.js -n -v -o ORGNAME -e ENVNAME -d ../bundles/inline-token-refresh
-```
+To deploy stackdriver-1 or 1a, just specify a different value for -d.
+
 
 There are some optional parameters to that script; you probably won't need them.
 
@@ -260,19 +258,19 @@ You need to select "Produced API" in the dropdown.
 
 One of the API Proxy bundles included here depends on the JAR from the JWT Generator
 callout that is available [here](https://github.com/apigee/iloveapis2015-jwt-jwe-jws).
-I've just included the binary JAR.  If for some reason you want to re-build the JAR from
-source, see that repo.
+I've just included the binary JAR. If for some reason you want to re-build the JAR from
+source, see that repo.  You probably don't want to use that version of the bundle. The builtin policy works and is faster and mo bettah. And supported. 
 
 
 ## Notes
 
 Unfortunately the security settings have changed on Apigee Edge SaaS since the original
-publication of this repo. The version of the API Proxy that uses the JWT callout JAR
-will no longer work correctly. The other API Proxy still works.
+publication of this repo. The version of the API Proxy that uses the Java callout for JWT generation
+will no longer work correctly. The other API Proxies (including the one using GenerateJWT) still works!
 
 
 ## License
 
-This material is Copyright 2017 Google Inc.  and is licensed under the [Apache 2.0
+This material is Copyright 2017-2018 Google LLC and is licensed under the [Apache 2.0
 License](LICENSE). This includes the the API Proxy configuration as well as the
 nodejs tools and libraries.
