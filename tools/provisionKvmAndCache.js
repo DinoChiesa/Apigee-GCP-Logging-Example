@@ -1,5 +1,5 @@
 #! /usr/local/bin/node
-/*jslint node:true */
+/*jslint node:true, esversion:6 */
 // provisionKvmAndCache.js
 // ------------------------------------------------------------------
 // provision the KVMs and cache for the example API proxies that log to
@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-August-20 10:03:25>
+// last saved: <2018-August-28 14:34:28>
 
 var fs = require('fs'),
     edgejs = require('apigee-edge-js'),
@@ -37,8 +37,7 @@ var fs = require('fs'),
       ['C' , 'cache=ARG', 'optional. name of the Cache in Edge. Will be created if nec. Default: ' + defaults.cache],
       ['S' , 'settingsmap=ARG', 'optional. name of the KVM in Edge for other non-secret settings. Will be created if nec. Default: ' + defaults.settingsmap],
       ['J' , 'privkeyjson=ARG', 'required. stackdriver JSON private key file.'],
-      ['L' , 'logid=ARG', 'optional. stackdriver log id for logging. Default: ' + defaults.logid],
-      ['T' , 'notoken', 'optional. do not try to get a authentication token.']
+      ['L' , 'logid=ARG', 'optional. stackdriver log id for logging. Default: ' + defaults.logid]
     ])).bindHelp();
 
 // ========================================================

@@ -109,17 +109,19 @@ Authorization: Bearer :token
 }
 ```
 
-The examples here are API Proxies that perform all of the above.
+The example here is an API Proxy that performs all of the above.
 
 ## What's Included?
 
-There are three versions of the API Proxy included here.
+The example you should follow is: 
 
-* [stackdriver-1](./bundles/inline-token-refresh) refreshes the access_token for stackdriver inline with respect to the API request, using the Java callout;
-* [stackdriver-1a](./bundles/inline-token-refresh) refreshes the access_token for stackdriver inline with respect to the API request, using the GenerateJWT policy;
-* [stackdriver-2](./bundles/asynchronous-token-refresh-via-nodejs) maintains an asynchronous job to do the token refreshing.
+* [stackdriver-1](./bundles/inline-builtin-token-refresh) refreshes the access_token for stackdriver inline with respect to the API request, using the GenerateJWT policy;
 
-All log to stackdriver either via the ServiceCallout or the JavaScript callout.
+There are two other examples included for archival purposes:
+
+* [stackdriver-1a](./bundles/DO-NOT-USE--inline-token-refresh) refreshes the access_token for stackdriver inline with respect to the API request, using a legacy Java callout;
+* [stackdriver-2](./bundles/DO-NOT-USE--asynchronous-token-refresh-via-nodejs) maintains an asynchronous job to do the token refreshing.
+
 
 ## Required in Edge
 
@@ -201,15 +203,12 @@ Make sure everything succeeds.
 After provisioning the KVMs and Cache, you also need to import and deploy one or both of the proxies.  To do so, run the
 [importAndDeploy.js](./tools/importAndDeploy.js) script. Again, specify the Edge organization and environment.
 
-To deploy stackdriver-2:
+To deploy the proxy:
 ```
-node ./importAndDeploy.js -n -v -o ORGNAME -e ENVNAME -d ../bundles/asynchronous-token-refresh-via-nodejs
+node ./importAndDeploy.js -u username@example.com -v -o ORGNAME -e ENVNAME -d ../bundles/inline-builtin-token-refresh
 ```
 
-Note: replace ORGNAME and ENVNAME with the name of your organization and environment.
-
-To deploy stackdriver-1 or 1a, just specify a different value for -d.
-
+Note: replace ORGNAME and ENVNAME with the name of your organization and environment. Replace username@example.com with your Apigee signin .
 
 There are some optional parameters to that script; you probably won't need them.
 
@@ -252,25 +251,10 @@ curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-2/t1 \
 Then, open [the Stackdriver logviewer webapp](https://console.cloud.google.com/logs/viewer) to view the log messages:
 You need to select "Produced API" in the dropdown.
 
-![Youtube video: Using Stackdriver from Edge](./images/screenshot-20170214-120451.png)
-
-## Dependencies
-
-One of the API Proxy bundles included here depends on the JAR from the JWT Generator
-callout that is available [here](https://github.com/apigee/iloveapis2015-jwt-jwe-jws).
-I've just included the binary JAR. If for some reason you want to re-build the JAR from
-source, see that repo.  You probably don't want to use that version of the bundle. The builtin policy works and is faster and mo bettah. And supported. 
-
-
-## Notes
-
-Unfortunately the security settings have changed on Apigee Edge SaaS since the original
-publication of this repo. The version of the API Proxy that uses the Java callout for JWT generation
-will no longer work correctly. The other API Proxies (including the one using GenerateJWT) still works!
-
+![Selecting the dropdown](./images/screenshot-20170214-120451.png)
 
 ## License
 
-This material is Copyright 2017-2018 Google LLC and is licensed under the [Apache 2.0
+This material is Copyright 2017-2020 Google LLC and is licensed under the [Apache 2.0
 License](LICENSE). This includes the the API Proxy configuration as well as the
 nodejs tools and libraries.
