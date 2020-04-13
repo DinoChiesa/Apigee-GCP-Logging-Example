@@ -2,6 +2,12 @@
 
 This repo includes two distinct API Proxy bundles showing how to do logging from Apigee Edge to Google Stackdriver.
 
+## License
+
+This material is Copyright 2017-2020 Google LLC and is licensed under the [Apache 2.0
+License](LICENSE). This includes the the API Proxy configuration as well as the
+nodejs tools and libraries.
+
 ## Disclaimer
 
 This example is not an official Google product, nor is it part of an official Google product.
@@ -11,7 +17,7 @@ If you have questions on using it, please ask  via github or community.apigee.co
 
 [Stackdriver](https://cloud.google.com/stackdriver/) is a SaaS for logging, monitoring, and
 alerting. It started as an independent company but was acquired by Google in 2014,
-and is now part of the Google Cloud Platform (as is Apigee Edge). Stackdriver
+and is now part of the Google Cloud Platform (as is Apigee). Stackdriver
 exposes a REST API to allow systems or applications to write log messages into the
 Stackdriver log. There is a UI for viewing the messages, configuring alerts on
 the messages, and so on.
@@ -113,17 +119,14 @@ The example here is an API Proxy that performs all of the above.
 
 ## What's Included?
 
-The example you should follow is: 
-
-* [stackdriver-1](./bundles/inline-builtin-token-refresh) refreshes the access_token for stackdriver inline with respect to the API request, using the GenerateJWT policy;
-
-There are two other examples included for archival purposes:
-
-* [stackdriver-1a](./bundles/DO-NOT-USE--inline-token-refresh) refreshes the access_token for stackdriver inline with respect to the API request, using a legacy Java callout;
-* [stackdriver-2](./bundles/DO-NOT-USE--asynchronous-token-refresh-via-nodejs) maintains an asynchronous job to do the token refreshing.
+There's a single API Proxy bundle that provides the example you should follow: 
+[stackdriver-1](./bundles/inline-builtin-token-refresh). This aPI proxy
+refreshes the access_token for stackdriver inline with respect to the API
+request, relying on builtin Apigee policies like GenerateJWT, ServiceCallout,
+LookupCache and PopulateCache.
 
 
-## Required in Edge
+## Required in Apigee
 
 To support the management of tokens for use against Stackdriver, there are
 multiple artifacts required on the Apigee Edge side:
@@ -253,8 +256,10 @@ You need to select "Produced API" in the dropdown.
 
 ![Selecting the dropdown](./images/screenshot-20170214-120451.png)
 
-## License
+## A Pattern
 
-This material is Copyright 2017-2020 Google LLC and is licensed under the [Apache 2.0
-License](LICENSE). This includes the the API Proxy configuration as well as the
-nodejs tools and libraries.
+Most Google Cloud services are available via the same OAuth 2.0 pattern. If you
+have a service account, you can use the same basic API Proxy to obtain a token
+for other services. You need only to request the proper scopes, in the JWT. And
+of course you need to authorize the service account for those scopes. 
+
