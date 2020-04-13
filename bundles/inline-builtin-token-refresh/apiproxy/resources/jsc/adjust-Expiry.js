@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
+/* global context, properties */
+
 var ttlValue = context.getVariable(properties.ttlValueVar);
 ttlValue -= parseInt(properties.delta, 10);
 context.setVariable(properties.ttlValueVar, ttlValue);
