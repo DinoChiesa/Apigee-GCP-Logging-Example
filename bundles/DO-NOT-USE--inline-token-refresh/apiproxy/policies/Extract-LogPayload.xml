@@ -1,9 +1,0 @@
-<ExtractVariables name='Extract-LogPayload'>
-  <Source>request</Source>
-  <VariablePrefix>stackdriver</VariablePrefix>
-  <JSONPayload>
-    <Variable name='logpayload'>
-      <JSONPath>$.payload</JSONPath>
-    </Variable>
-  </JSONPayload>
-</ExtractVariables>
