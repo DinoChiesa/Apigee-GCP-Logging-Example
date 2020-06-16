@@ -1,6 +1,7 @@
 # Stackdriver demo proxy
 
-This repo includes two distinct API Proxy bundles showing how to do logging from Apigee Edge to Google Stackdriver.
+This repo includes two distinct API Proxy bundles showing how to do logging from
+Apigee to Google Cloud Logging (nee Stackdriver).
 
 ## License
 
@@ -13,16 +14,16 @@ nodejs tools and libraries.
 This example is not an official Google product, nor is it part of an official Google product.
 If you have questions on using it, please ask  via github or community.apigee.com .
 
-## What is Stackdriver?
+## What is Google Cloud Operations?
 
-[Stackdriver](https://cloud.google.com/stackdriver/) is a SaaS for logging, monitoring, and
-alerting. It started as an independent company but was acquired by Google in 2014,
-and is now part of the Google Cloud Platform (as is Apigee). Stackdriver
+[Operations](https://cloud.google.com/products/operations) is a SaaS for logging, monitoring, and
+alerting. It started as an independent company named "Stackdriver" but was acquired by Google in 2014,
+and is now part of the Google Cloud Platform (as is Apigee). Operations
 exposes a REST API to allow systems or applications to write log messages into the
 Stackdriver log. There is a UI for viewing the messages, configuring alerts on
 the messages, and so on.
 
-## How does Stackdriver complement Apigee Edge?
+## How does Operations complement Apigee Edge?
 
 Some people embed MessageLogging policies into the API Proxies they have in Apigee
 Edge in order to log messages that can later be examined or analyzed, to diagnose
@@ -31,12 +32,12 @@ listeners. For example, Splunk has a syslog listener that will accept inbound
 messages from a MessageLogging policy configured in Apigee Edge.
 
 But some people don't like the expense of Splunk, and are considering using the
-Google Cloud Platform. This example shows how you can use Stackdriver, part of
-GCP, to collect and aggregate log messages from Edge, using built-in policies.
+Google Cloud Platform. This example shows how you can use Operations, part of
+GCP, to collect and aggregate log messages from Apigee, using built-in policies.
 
 ## How it works
 
-The Stackdriver API supports OAuth 2.0 for inbound API calls to write (or read, or
+The Operations logging API supports OAuth 2.0 for inbound API calls to write (or read, or
 query) log messages. For our purposes, we want Apigee Edge to only write messages.  The
 OAuth token is a standard bearer token, and Google dispenses the token via an RFC7523
 grant (see [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication
@@ -87,11 +88,13 @@ like this:
 }
 ```
 
-That access token can then be used against the Stackdriver APIs.
+That access token can then be used against the Operations logging APIs.
 
-The point here is that a system that logs to Stackdriver must obtain and cache the access token, and must be able to obtain new access tokens on expiry.
+The point here is that a system that logs to Operations must obtain and cache
+the access token, and must be able to obtain new access tokens on expiry.
 
-Once the system has a valid access token, it can invoke the Stackdriver API for logging. That looks like this:
+Once the system has a valid access token, it can invoke the Operations API for
+logging. That looks like this:
 
 ```
 POST https://logging.googleapis.com/v2/entries:write
@@ -119,8 +122,8 @@ The example here is an API Proxy that performs all of the above.
 
 ## What's Included?
 
-There's a single API Proxy bundle that provides the example you should follow: 
-[stackdriver-1](./bundles/inline-builtin-token-refresh). This aPI proxy
+There's a single API Proxy bundle that provides the example you should follow:
+[inline-builtin-token-refresh](./bundles/inline-builtin-token-refresh). This aPI proxy
 refreshes the access_token for stackdriver inline with respect to the API
 request, relying on builtin Apigee policies like GenerateJWT, ServiceCallout,
 LookupCache and PopulateCache.
@@ -128,8 +131,8 @@ LookupCache and PopulateCache.
 
 ## Required in Apigee
 
-To support the management of tokens for use against Stackdriver, there are
-multiple artifacts required on the Apigee Edge side:
+To support the management of tokens for use against Operations, there are
+multiple artifacts required on the Apigee side:
 
  - encrypted KVM called "secrets1"
  - regular KVM called "settings1"
@@ -137,31 +140,31 @@ multiple artifacts required on the Apigee Edge side:
 
 All environment-scoped.
 
-The secrets1 KVM stores the private key of the client (the service account), which is
-used to sign the JWT required to get each new access token.  The cache stores the access
-token for its lifetime. And the other KVM stores other stackdriver-related settings,
-like the project ID and so on.
+The secrets1 KVM stores the private key of the client (the service account),
+which is used to sign the JWT required to get each new access token.  The cache
+stores the access token for its lifetime. And the other KVM stores other
+operations- and GCP-related settings, like the project ID and so on.
 
 
 ## Some Screencasts to guide you
 
 Here's a talk-through of how it works. Click the image to see the screencast:
 
-### Part 1: setting up Stackdriver
+### Part 1: setting up Operations (fka Stackdriver)
 
 [![Youtube video: Setting up a Stackdriver Account](./images/screenshot-20170215-105158.png)](http://www.youtube.com/watch?v=7tkAkykALNs "Setting up a Stackdriver Account")
 
 ### Part 2: Configuring Edge and Using the API Proxy
 
-[![Youtube video: Using Stackdriver from Edge](./images/screenshot-20170214-115338.png)](http://www.youtube.com/watch?v=9QyxrVvGd_I "Using Stackdriver from Edge")
+[![Youtube video: Using Stackdriver from Apigee](./images/screenshot-20170214-115338.png)](http://www.youtube.com/watch?v=9QyxrVvGd_I "Using Stackdriver from Apigee")
 
 
 ## How to use: First things first
 
 This is covered in the "Part 1" screencast above.  Go to
-[Stackdriver](https://cloud.google.com/stackdriver/) , and set up a project; select a unique
+[Operations](https://cloud.google.com/products/operations/) , and set up a project; select a unique
 project id.  Also, using [the Google API console](https://console.cloud.google.com/apis),
-enable the project for the Stackdriver APIs.  Finally, using [the service accounts
+enable the project for the Cloud Logging APIs.  Finally, using [the service accounts
 management page](https://console.developers.google.com/iam-admin/serviceaccounts), create a
 service account, generate a new private key for the service account, and save the private
 key to a JSON file.  All of this is shown in the screencast.
@@ -182,8 +185,8 @@ tools directory. For this you need to specify:
 The JSON file contains information such as:
 
 * Stackdriver project id
-* the PEM-encoded private key you got from Stackdriver
-* the issuer, or email of the service account you got from Stackdriver
+* the PEM-encoded private key you got from Operations
+* the issuer, or email of the service account you got from Operations
 
 Before you start you must install the node libraries.
 ```
@@ -197,8 +200,8 @@ node ./provisionKvmAndCache.js  -n -o ORGNAME -e ENVNAME \
     -J ~/dev/stackdriver/project-apigee-edge-0bb2933e52e4.json
 ```
 
-There are some optional parameters to this script as well, but don't use them unless you know what you're getting into.
-Make sure everything succeeds.
+There are some optional parameters to this script as well, but don't use them
+unless you know what you're getting into.  Make sure everything succeeds.
 
 
 ## Importing and Deploying the Proxy
@@ -228,9 +231,9 @@ curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
   -H content-type:application/json \
   -d '{ "payload" : "YOUR MESSAGE GOES HERE" }'
 ```
-This invokes Stackdriver via the httpClient from within a JavaScript callout. The httpClient does not wait for a response. This means a minimum of delay introduced into the proxy flow.
+This invokes Operations (Stackdriver) via the httpClient from within a JavaScript callout. The httpClient does not wait for a response. This means a minimum of delay introduced into the proxy flow.
 
-To invoke the API that logs to Stackdriver and waits for a response, we can use ServiceCallout. Like this:
+To invoke the API that logs to Operations and waits for a response, we can use ServiceCallout. Like this:
 
 ```
 curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
@@ -249,9 +252,9 @@ curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-2/t1 \
 ```
 
 
-## View the logs in Stackdriver
+## View the logs in Operations
 
-Then, open [the Stackdriver logviewer webapp](https://console.cloud.google.com/logs/viewer) to view the log messages:
+Then, open [the Cloud Logging logviewer webapp](https://console.cloud.google.com/logs/viewer) to view the log messages:
 You need to select "Produced API" in the dropdown.
 
 ![Selecting the dropdown](./images/screenshot-20170214-120451.png)
@@ -261,5 +264,4 @@ You need to select "Produced API" in the dropdown.
 Most Google Cloud services are available via the same OAuth 2.0 pattern. If you
 have a service account, you can use the same basic API Proxy to obtain a token
 for other services. You need only to request the proper scopes, in the JWT. And
-of course you need to authorize the service account for those scopes. 
-
+of course you need to authorize the service account for those scopes.
