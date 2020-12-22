@@ -1,0 +1,20 @@
+<KeyValueMapOperations name='KVM-Get-GCP-Logging-Settings' mapIdentifier='settings1'>
+  <Scope>environment</Scope>
+  <ExpiryTimeInSecs>30</ExpiryTimeInSecs>
+  <!-- these gets will be cached -->
+  <Get assignTo='gcplogging.projectid'>
+    <Key>
+      <Parameter>gcplogging.projectid</Parameter>
+    </Key>
+  </Get>
+  <Get assignTo='gcplogging.logid'>
+    <Key>
+      <Parameter>gcplogging.logid</Parameter>
+    </Key>
+  </Get>
+  <Get assignTo='gcplogging.jwt_issuer'>
+    <Key>
+      <Parameter>gcplogging.jwt_issuer</Parameter>
+    </Key>
+  </Get>
+</KeyValueMapOperations>

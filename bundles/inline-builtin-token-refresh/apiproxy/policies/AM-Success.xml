@@ -3,7 +3,7 @@
   <Set>
     <Payload contentType='application/json'>{
   "status" : true,
-  "logpayload" : "{stackdriver.logpayload}",
+  "logpayload" : "{gcplogging.logpayload}",
   "timestamp" : "{system.timestamp}"
 }
 </Payload>

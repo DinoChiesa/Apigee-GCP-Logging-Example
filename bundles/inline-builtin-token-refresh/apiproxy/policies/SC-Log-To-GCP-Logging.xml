@@ -1,11 +1,11 @@
-<ServiceCallout name='SC-Log-To-Stackdriver'>
+<ServiceCallout name='SC-Log-To-GCP-Logging'>
   <Request>
     <Set>
       <Headers>
-        <Header name='authorization'>Bearer {stackdriver.token}</Header>
+        <Header name='authorization'>Bearer {gcplogging.token}</Header>
       </Headers>
       <Payload contentType='application/json'>{
-  "logName": "projects/{stackdriver.projectid}/logs/{stackdriver.logid}",
+  "logName": "projects/{gcplogging.projectid}/logs/{gcplogging.logid}",
   "resource" : {
     "type": "api",
     "labels": {}
@@ -15,7 +15,7 @@
   },
   "entries": [{
       "severity" : "INFO",
-      "textPayload" : "{stackdriver.logpayload}"
+      "textPayload" : "{gcplogging.logpayload}"
      }
   ],
   "partialSuccess": true

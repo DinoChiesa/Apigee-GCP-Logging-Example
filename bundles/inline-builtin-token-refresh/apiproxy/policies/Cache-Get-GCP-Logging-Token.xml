@@ -1,0 +1,9 @@
+<LookupCache name='Cache-Get-GCP-Logging-Token'>
+  <CacheResource>cache1</CacheResource>
+  <Scope>Application</Scope>
+  <AssignTo>gcplogging.token</AssignTo>
+  <CacheKey>
+    <KeyFragment>gcplogging.token</KeyFragment>
+    <!-- <KeyFragment ref='flowvariable.name' /> -->
+  </CacheKey>
+</LookupCache>

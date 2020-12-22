@@ -1,0 +1,13 @@
+<PopulateCache name='Cache-Put-GCP-Logging-Token'>
+  <CacheResource>cache1</CacheResource>
+  <Scope>Application</Scope>
+  <Source>gcplogging.newtoken</Source>
+  <CacheKey>
+    <!-- <Prefix>gcplogging.token</Prefix> -->
+    <KeyFragment>gcplogging.token</KeyFragment>
+    <!-- <KeyFragment ref='variable.containing.keyfrag' /> -->
+  </CacheKey>
+  <ExpirySettings>
+    <TimeoutInSec ref='gcplogging.expires_in'>3540</TimeoutInSec> <!-- 3540 = 3600-60 = default ttl -->
+  </ExpirySettings>
+</PopulateCache>

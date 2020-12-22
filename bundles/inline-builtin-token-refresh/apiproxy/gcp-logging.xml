@@ -1,9 +1,9 @@
-<APIProxy revision='1' name='stackdriver-1a'>
+<APIProxy revision='1' name='gcp-logging'>
   <ConfigurationVersion minorVersion='0' majorVersion='4'/>
   <CreatedAt>1487034926488</CreatedAt>
   <CreatedBy>dino</CreatedBy>
   <Description></Description>
-  <DisplayName>stackdriver-1a</DisplayName>
+  <DisplayName>gcp-logging</DisplayName>
   <LastModifiedAt>1488305505770</LastModifiedAt>
   <LastModifiedBy>orgAdmin</LastModifiedBy>
   <TargetEndpoints>

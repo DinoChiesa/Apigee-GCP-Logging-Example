@@ -16,7 +16,7 @@
 // limitations under the License.
 //
 // created: Wed Feb 15 16:28:55 2017
-// last saved: <2018-August-20 10:06:47>
+// last saved: <2020-December-22 07:53:14>
 //
 // A simple object that performs message templating.
 // Accepts a string that includes patterns like {foo_bar} and replaces
@@ -50,6 +50,7 @@
 //   "entries": [{ "textPayload" : "xyz123" } ]
 // }
 //
+/* global context */
 
 (function () {
   'use strict';

@@ -1,9 +1,9 @@
-// log-To-Stackdriver-2.js
+// log-To-GCP-Logging-2.js
 // ------------------------------------------------------------------
 //
 // Send a POST to stackdriver without waiting for a response.
 //
-// Copyright 2017 Google LLC.
+// Copyright 2017-2020 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@
 // limitations under the License.
 //
 // created: Wed Feb 15 16:28:55 2017
-// last saved: <2018-August-20 10:07:03>
+// last saved: <2020-December-22 07:59:22>
+/* global MessageTemplate, properties, Request, httpClient */
 
-// fire and forget
 var payload = (new MessageTemplate(properties.payload)).fill();
 var headers = {
       'Content-Type' : 'application/json',
@@ -28,4 +28,6 @@ var headers = {
     };
 var url = (new MessageTemplate(properties.endpoint)).fill();
 var req = new Request(url, 'POST', headers, payload);
+
+// fire and forget
 var exchange = httpClient.send(req);

@@ -1,7 +1,7 @@
-# Stackdriver demo proxy
+# Google Cloud Logging demo proxy
 
-This repo includes two distinct API Proxy bundles showing how to do logging from
-Apigee to Google Cloud Logging (nee Stackdriver).
+This repo includes an API Proxy bundle showing how to do logging from
+Apigee to Google Cloud Logging (formerly known as "Stackdriver").
 
 ## License
 
@@ -14,16 +14,16 @@ nodejs tools and libraries.
 This example is not an official Google product, nor is it part of an official Google product.
 If you have questions on using it, please ask  via github or community.apigee.com .
 
-## What is Google Cloud Operations?
+## What is Google Cloud Logging?
 
-[Operations](https://cloud.google.com/products/operations) is a SaaS for logging, monitoring, and
+[Cloud Logging](https://cloud.google.com/logging) is a SaaS for logging, monitoring, and
 alerting. It started as an independent company named "Stackdriver" but was acquired by Google in 2014,
-and is now part of the Google Cloud Platform (as is Apigee). Operations
+and is now part of the Google Cloud Platform (as is Apigee). Cloud Logging
 exposes a REST API to allow systems or applications to write log messages into the
 Stackdriver log. There is a UI for viewing the messages, configuring alerts on
 the messages, and so on.
 
-## How does Operations complement Apigee Edge?
+## How does GCP Logging complement Apigee Edge?
 
 Some people embed MessageLogging policies into the API Proxies they have in Apigee
 Edge in order to log messages that can later be examined or analyzed, to diagnose
@@ -31,13 +31,13 @@ problems or simply to monitor their systems. MessageLogging works for syslog
 listeners. For example, Splunk has a syslog listener that will accept inbound
 messages from a MessageLogging policy configured in Apigee Edge.
 
-But some people don't like the expense of Splunk, and are considering using the
-Google Cloud Platform. This example shows how you can use Operations, part of
+But some people don't want to use Splunk for whatever reason, and are considering using the
+Google Cloud Platform. This example shows how you can use Cloud Logging, part of
 GCP, to collect and aggregate log messages from Apigee, using built-in policies.
 
 ## How it works
 
-The Operations logging API supports OAuth 2.0 for inbound API calls to write (or read, or
+The Cloud Logging API supports OAuth 2.0 for inbound API calls to write (or read, or
 query) log messages. For our purposes, we want Apigee Edge to only write messages.  The
 OAuth token is a standard bearer token, and Google dispenses the token via an RFC7523
 grant (see [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication
@@ -88,12 +88,12 @@ like this:
 }
 ```
 
-That access token can then be used against the Operations logging APIs.
+That access token can then be used against the Cloud Logging APIs.
 
-The point here is that a system that logs to Operations must obtain and cache
+The point here is that a system that logs to Cloud Logging must obtain and cache
 the access token, and must be able to obtain new access tokens on expiry.
 
-Once the system has a valid access token, it can invoke the Operations API for
+Once the system has a valid access token, it can invoke the Cloud Logging API for
 logging. That looks like this:
 
 ```
@@ -123,7 +123,7 @@ The example here is an API Proxy that performs all of the above.
 ## What's Included?
 
 There's a single API Proxy bundle that provides the example you should follow:
-[inline-builtin-token-refresh](./bundles/inline-builtin-token-refresh). This aPI proxy
+[inline-builtin-token-refresh](./bundles/inline-builtin-token-refresh). This API proxy
 refreshes the access_token for stackdriver inline with respect to the API
 request, relying on builtin Apigee policies like GenerateJWT, ServiceCallout,
 LookupCache and PopulateCache.
@@ -131,7 +131,7 @@ LookupCache and PopulateCache.
 
 ## Required in Apigee
 
-To support the management of tokens for use against Operations, there are
+To support the management of tokens for use against Cloud Logging, there are
 multiple artifacts required on the Apigee side:
 
  - encrypted KVM called "secrets1"
@@ -150,25 +150,24 @@ operations- and GCP-related settings, like the project ID and so on.
 
 Here's a talk-through of how it works. Click the image to see the screencast:
 
-### Part 1: setting up Operations (fka Stackdriver)
+### Part 1: setting up Cloud Logging (fka Stackdriver)
 
-[![Youtube video: Setting up a Stackdriver Account](./images/screenshot-20170215-105158.png)](http://www.youtube.com/watch?v=7tkAkykALNs "Setting up a Stackdriver Account")
+[![Youtube video: Setting up a Cloud Logging Account](./images/screenshot-20170215-105158.png)](http://www.youtube.com/watch?v=7tkAkykALNs "Setting up a Cloud Logging Account")
 
 ### Part 2: Configuring Edge and Using the API Proxy
 
-[![Youtube video: Using Stackdriver from Apigee](./images/screenshot-20170214-115338.png)](http://www.youtube.com/watch?v=9QyxrVvGd_I "Using Stackdriver from Apigee")
+[![Youtube video: Using Cloud Logging from Apigee](./images/screenshot-20170214-115338.png)](http://www.youtube.com/watch?v=9QyxrVvGd_I "Using Cloud Logging from Apigee")
 
 
 ## How to use: First things first
 
 This is covered in the "Part 1" screencast above.  Go to
-[Operations](https://cloud.google.com/products/operations/) , and set up a project; select a unique
+[Cloud Logging](https://cloud.google.com/logging/) , and set up a project; select a unique
 project id.  Also, using [the Google API console](https://console.cloud.google.com/apis),
 enable the project for the Cloud Logging APIs.  Finally, using [the service accounts
 management page](https://console.developers.google.com/iam-admin/serviceaccounts), create a
 service account, generate a new private key for the service account, and save the private
 key to a JSON file.  All of this is shown in the screencast.
-
 
 
 ## Setting up the KVMs and Cache
@@ -184,8 +183,8 @@ tools directory. For this you need to specify:
 
 The JSON file contains information such as:
 
-* Stackdriver project id
-* the PEM-encoded private key you got from Operations
+* GCP Cloud Logging project id
+* the PEM-encoded private key you got from GCP Cloud Logging
 * the issuer, or email of the service account you got from Operations
 
 Before you start you must install the node libraries.
@@ -196,8 +195,10 @@ npm install
 
 Example (running from the tools directory):
 ```
-node ./provisionKvmAndCache.js  -n -o ORGNAME -e ENVNAME \
-    -J ~/dev/stackdriver/project-apigee-edge-0bb2933e52e4.json
+ORG=myorg
+ENV=test
+node ./provisionKvmAndCache.js  -n -o $ORG -e $ENV \
+    -J ~/dev/gcp-logging/project-apigee-edge-0bb2933e52e4.json
 ```
 
 There are some optional parameters to this script as well, but don't use them
@@ -211,7 +212,7 @@ After provisioning the KVMs and Cache, you also need to import and deploy one or
 
 To deploy the proxy:
 ```
-node ./importAndDeploy.js -u username@example.com -v -o ORGNAME -e ENVNAME -d ../bundles/inline-builtin-token-refresh
+node ./importAndDeploy.js -u username@example.com -v -o $ORG -e $ENV -d ../bundles/inline-builtin-token-refresh
 ```
 
 Note: replace ORGNAME and ENVNAME with the name of your organization and environment. Replace username@example.com with your Apigee signin .
@@ -227,16 +228,16 @@ configured.
 After you've provisioned the KVM and cache, and then imported and deployed the proxy, you should be able to invoke it.  Here's a sample call invoking the API proxy that does "inline" token refreshing:
 
 ```
-curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
+curl -i https://$ORG-$ENV.apigee.net/gcp-logging/t1 \
   -H content-type:application/json \
   -d '{ "payload" : "YOUR MESSAGE GOES HERE" }'
 ```
-This invokes Operations (Stackdriver) via the httpClient from within a JavaScript callout. The httpClient does not wait for a response. This means a minimum of delay introduced into the proxy flow.
+This invokes Operations Logging (Stackdriver) via the httpClient from within a JavaScript callout. The httpClient does not wait for a response. This means a minimum of delay introduced into the proxy flow.
 
 To invoke the API that logs to Operations and waits for a response, we can use ServiceCallout. Like this:
 
 ```
-curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
+curl -i https://$ORG-$ENV.apigee.net/gcp-logging/t1 \
   -H content-type:application/json \
   -H useSC:true \
   -d '{ "payload" : "This Message was Delivered via ServiceCallout" }'
@@ -244,24 +245,18 @@ curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-1/t1 \
 
 You may see tens of ms difference between these two mechanisms. Check the trace UI for timings.
 
-To use the version of the API Proxy that uses asynchronous refresh of the token, use this:
-```
-curl -i https://ORGNAME-ENVNAME.apigee.net/stackdriver-2/t1 \
-  -H content-type:application/json \
-  -d '{ "payload" : "YOUR MESSAGE GOES HERE" }'
-```
-
-
-## View the logs in Operations
+## View the logs in Cloud Logging
 
 Then, open [the Cloud Logging logviewer webapp](https://console.cloud.google.com/logs/viewer) to view the log messages:
 You need to select "Produced API" in the dropdown.
 
 ![Selecting the dropdown](./images/screenshot-20170214-120451.png)
 
-## A Pattern
+## This is a Pattern
 
-Most Google Cloud services are available via the same OAuth 2.0 pattern. If you
-have a service account, you can use the same basic API Proxy to obtain a token
-for other services. You need only to request the proper scopes, in the JWT. And
-of course you need to authorize the service account for those scopes.
+Most Google Cloud services, including BigQuery, PubSub, DLP, and many more, are
+available via the same OAuth 2.0 pattern. If you have a service account, you can
+use the same basic API Proxy to obtain a token for other services. You need only
+to request the proper scopes, in the JWT. And of course you need to authorize
+the service account for those scopes.
+

@@ -1,6 +1,6 @@
-<ExtractVariables name='Extract-Stackdriver-AccessToken'>
+<ExtractVariables name='Extract-GCP-Logging-AccessToken'>
   <Source>tokenResponse</Source>
-  <VariablePrefix>stackdriver</VariablePrefix>
+  <VariablePrefix>gcplogging</VariablePrefix>
   <JSONPayload>
     <Variable name='newtoken'>
       <JSONPath>$.access_token</JSONPath>

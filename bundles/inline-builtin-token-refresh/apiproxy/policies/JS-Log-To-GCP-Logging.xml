@@ -1,8 +1,8 @@
-<Javascript name='JS-Log-To-Stackdriver-2' timeLimit='400'>
+<Javascript name='JS-Log-To-GCP-Logging' timeLimit='400'>
   <Properties>
-    <Property name='authz_header'>Bearer {stackdriver.token}</Property>
+    <Property name='authz_header'>Bearer {gcplogging.token}</Property>
     <Property name='payload'>{
-  "logName": "projects/{stackdriver.projectid}/logs/{stackdriver.logid}",
+  "logName": "projects/{gcplogging.projectid}/logs/{gcplogging.logid}",
   "resource" : {
     "type": "api",
     "labels": {}
@@ -12,7 +12,7 @@
   },
   "entries": [{
       "severity" : "INFO",
-      "textPayload" : "{stackdriver.logpayload}"
+      "textPayload" : "{gcplogging.logpayload}"
      }
   ],
   "partialSuccess": true
@@ -20,5 +20,5 @@
     <Property name='endpoint'>https://logging.googleapis.com/v2/entries:write</Property>
   </Properties>
   <IncludeURL>jsc://messageTemplate.js</IncludeURL>
-  <ResourceURL>jsc://log-To-Stackdriver-2.js</ResourceURL>
+  <ResourceURL>jsc://log-To-GCP-Logging.js</ResourceURL>
 </Javascript>

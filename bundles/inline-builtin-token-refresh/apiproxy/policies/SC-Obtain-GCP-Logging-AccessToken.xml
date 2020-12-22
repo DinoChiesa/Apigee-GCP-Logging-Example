@@ -1,4 +1,4 @@
-<ServiceCallout name='SC-Obtain-Stackdriver-AccessToken'>
+<ServiceCallout name='SC-Obtain-GCP-Logging-AccessToken'>
   <Request>
     <Set>
       <Headers>
@@ -6,7 +6,7 @@
       </Headers>
       <FormParams>
         <FormParam name='grant_type'>urn:ietf:params:oauth:grant-type:jwt-bearer</FormParam>
-        <FormParam name='assertion'>{stackdriver_jwt}</FormParam>
+        <FormParam name='assertion'>{gcp_bearer_jwt}</FormParam>
       </FormParams>
       <Verb>POST</Verb>
     </Set>

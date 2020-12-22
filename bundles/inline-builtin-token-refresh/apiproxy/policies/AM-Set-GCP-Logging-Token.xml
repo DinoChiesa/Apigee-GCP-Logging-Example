@@ -1,7 +1,7 @@
-<AssignMessage name='AM-Set-Stackdriver-Token'>
+<AssignMessage name='AM-Set-GCP-Logging-Token'>
   <AssignVariable>
-    <Name>stackdriver.token</Name>
-    <Ref>stackdriver.newtoken</Ref>
+    <Name>gcplogging.token</Name>
+    <Ref>gcplogging.newtoken</Ref>
   </AssignVariable>
   <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
 </AssignMessage>

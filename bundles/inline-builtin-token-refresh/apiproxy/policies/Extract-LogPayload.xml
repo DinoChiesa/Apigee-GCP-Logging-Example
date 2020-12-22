@@ -1,6 +1,6 @@
 <ExtractVariables name='Extract-LogPayload'>
   <Source>request</Source>
-  <VariablePrefix>stackdriver</VariablePrefix>
+  <VariablePrefix>gcplogging</VariablePrefix>
   <JSONPayload>
     <Variable name='logpayload'>
       <JSONPath>$.payload</JSONPath>

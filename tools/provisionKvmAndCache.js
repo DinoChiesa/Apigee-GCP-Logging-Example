@@ -3,9 +3,9 @@
 // provisionKvmAndCache.js
 // ------------------------------------------------------------------
 // provision the KVMs and cache for the example API proxies that log to
-// stackdriver.
+// GCP logging.
 //
-// Copyright 2017-2018 Google LLC.
+// Copyright 2017-2020  Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,31 +19,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2018-August-28 14:34:28>
+// last saved: <2020-December-22 07:49:31>
 
-var fs = require('fs'),
-    edgejs = require('apigee-edge-js'),
-    common = edgejs.utility,
-    apigeeEdge = edgejs.edge,
+const fs = require('fs'),
+    apigeejs = require('apigee-edge-js'),
+    common = apigeejs.utility,
+    apigee = apigeejs.edge,
     sprintf = require('sprintf-js').sprintf,
     Getopt = require('node-getopt'),
-    async = require('async'),
-    version = '20171115-1842',
-    stackdriverJson,
+    version = '20201222-0732',
     defaults = { secretsmap : 'secrets1', settingsmap: 'settings1', cache: 'cache1', logid: 'syslog' },
     getopt = new Getopt(common.commonOptions.concat([
-      ['e' , 'env=ARG', 'required. the Edge environment for which to store the KVM data'],
-      ['Z' , 'secretsmap=ARG', 'optional. name of the KVM in Edge for keys. Will be created if nec. Default: ' + defaults.secretsmap],
-      ['C' , 'cache=ARG', 'optional. name of the Cache in Edge. Will be created if nec. Default: ' + defaults.cache],
-      ['S' , 'settingsmap=ARG', 'optional. name of the KVM in Edge for other non-secret settings. Will be created if nec. Default: ' + defaults.settingsmap],
-      ['J' , 'privkeyjson=ARG', 'required. stackdriver JSON private key file.'],
-      ['L' , 'logid=ARG', 'optional. stackdriver log id for logging. Default: ' + defaults.logid]
+      ['e' , 'env=ARG', 'required. the Apigee environment for which to store the KVM data'],
+      ['Z' , 'secretsmap=ARG', 'optional. name of the KVM in Apigee for keys. Will be created if nec. Default: ' + defaults.secretsmap],
+      ['C' , 'cache=ARG', 'optional. name of the Cache in Apigee. Will be created if nec. Default: ' + defaults.cache],
+      ['S' , 'settingsmap=ARG', 'optional. name of the KVM in Apigee for other non-secret settings. Will be created if nec. Default: ' + defaults.settingsmap],
+      ['J' , 'privkeyjson=ARG', 'required. GCP Logging JSON private key file.'],
+      ['L' , 'logid=ARG', 'optional. GCP Logging log id for logging. Default: ' + defaults.logid]
     ])).bindHelp();
 
 // ========================================================
 
 console.log(
-  'Apigee Edge provisioning tool for KVM + Cache for Stackdriver demo, version: ' + version + '\n' +
+  'Apigee Edge provisioning tool for KVM + Cache for GCP Logging demo, version: ' + version + '\n' +
     'Node.js ' + process.version + '\n');
 
 common.logWrite('start');
@@ -62,7 +60,7 @@ if ( !opt.options.privkeyjson ) {
   process.exit(1);
 }
 
-stackdriverJson = require(opt.options.privkeyjson);
+let privkeyJson = require(opt.options.privkeyjson);
 
 // apply defaults
 if ( !opt.options.logid ) {
@@ -84,98 +82,48 @@ if ( !opt.options.cache ) {
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-function loadDataIntoMaps(org, cb) {
+function loadDataIntoMaps(org) {
   // var re = new RegExp('(?:\r\n|\r|\n)', 'g');
   // var pemString = fs.readFileSync(opt.options.privkeypem, 'utf8').replace(re,'\\n');
-  var pemString = stackdriverJson.private_key;
-  var options = {
+  let pemString = privkeyJson.private_key;
+  let options = {
         env: opt.options.env,
         kvm: opt.options.secretsmap,
-        key: 'stackdriver.privKeyPem',
+        key: 'gcplogging.privKeyPem',
         value: pemString
       };
   common.logWrite(sprintf('loading PEM into %s', opt.options.secretsmap));
-  org.kvms.put(options, function(e, result){
-    if (e) return cb(e, result);
-    options.kvm = opt.options.settingsmap;
-    options.key = 'stackdriver.projectid';
-    options.value = stackdriverJson.project_id;
-    org.kvms.put(options, function(e, result){
-      if (e) return cb(e, result);
-      options.key = 'stackdriver.logid';
-      options.value = opt.options.logid;
-      org.kvms.put(options, function(e, result){
-        if (e) return cb(e, result);
-        options.key = 'stackdriver.jwt_issuer';
-        options.value = stackdriverJson.client_email;
-        org.kvms.put(options, function(e, result){
-          if (e) return cb(e, result);
-          cb(null, result);
+  return org.kvms.put(options)
+    .then(result => {
+      options.kvm = opt.options.settingsmap;
+      options.key = 'gcplogging.projectid';
+      options.value = privkeyJson.project_id;
+      return org.kvms.put(options)
+        .then (result => {
+          options.key = 'gcplogging.logid';
+          options.value = opt.options.logid;
+          return org.kvms.put(options)
+            .then (result => {
+              options.key = 'gcplogging.jwt_issuer';
+              options.value = privkeyJson.client_email;
+              return org.kvms.put(options);
+            });
         });
-      });
     });
-  });
 }
 
 
-
-function kvmsLoadedCb(org) {
-  return function(e, result) {
-    if (e) {
-    common.logWrite(JSON.stringify(e, null, 2));
-      console.log(e.stack);
-      process.exit(1);
-    }
-    common.logWrite('ok. the KVMs were loaded successfully.');
-    checkAndCreateCache(org, function(e, result){
-      if (e) {
-    common.logWrite(JSON.stringify(e, null, 2));
-        console.log(e.stack);
-        process.exit(1);
+function checkAndCreateCache(org) {
+  return org.caches.get({ env: opt.options.env })
+    .then( result => {
+      if (result.indexOf(opt.options.cache) == -1) {
+        return org.caches.create({ env: opt.options.env, name: opt.options.cache});
       }
-      common.logWrite('ok. the cache exists.');
+      return Promise.resolve({});
     });
-  };
 }
 
-
-function checkAndCreateCache(org, cb) {
-  org.caches.get({ env: opt.options.env }, function(e, result){
-    if (e) {
-      common.logWrite(JSON.stringify(e, null, 2));
-      console.log(e.stack);
-      process.exit(1);
-    }
-    if (result.indexOf(opt.options.cache) == -1) {
-      org.caches.create({ env: opt.options.env, name: opt.options.cache},
-                        function(e, result){
-                          if (e) return cb(e);
-                          cb(null, opt.options.cache);
-                        });
-    }
-    else {
-      return cb(null, opt.options.cache);
-    }
-  });
-}
-
-function createOneKvm(org) {
-  return function (mapname, cb) {
-    // create KVM.  Use encrypted if it is for secrets.
-    org.kvms.create({ env: opt.options.env, name: mapname, encrypted:(mapname == opt.options.secretsmap)},
-                    function(e, result){
-                      if (e) return cb(e);
-                      cb(null, mapname);
-                    });
-  };
-}
-
-
-function dedupe(e, i, c) { // extra step to remove duplicates
-  return c.indexOf(e) === i;
-}
-
-var options = {
+const options = {
       mgmtServer: opt.options.mgmtserver,
       org : opt.options.org,
       user: opt.options.username,
@@ -184,40 +132,36 @@ var options = {
       verbosity: opt.options.verbose || 0
     };
 
-apigeeEdge.connect(options, function(e, org) {
-  if (e) {
-    common.logWrite(JSON.stringify(e, null, 2));
-    process.exit(1);
-  }
-  common.logWrite('connected');
+apigee.connect(options)
+  .then (org => {
+    common.logWrite('connected');
+    return org.kvms.get({ env: opt.options.env })
+    .then(result => {
+      let missingMaps = [opt.options.settingsmap, opt.options.secretsmap]
+        .filter( value => result.indexOf(value) == -1 )
+        .filter( (e, i, c) => c.indexOf(e) === i);// dedupe
 
-  org.kvms.get({ env: opt.options.env }, function(e, result){
-    if (e) {
-      common.logWrite(JSON.stringify(e, null, 2));
-      console.log(e.stack);
-      process.exit(1);
-    }
+      let p = Promise.resolve({});
 
-    var missingMaps = [opt.options.settingsmap, opt.options.secretsmap]
-      .filter(function(value) { return result.indexOf(value) == -1; })
-      .filter(dedupe);
+      if (missingMaps && missingMaps.length > 0) {
+        common.logWrite('Need to create one or more maps');
 
-    if (missingMaps && missingMaps.length > 0){
-      common.logWrite('Need to create one or more maps');
-      async.mapSeries(missingMaps, createOneKvm(org), function(e, results) {
-        if (e) {
-          common.logWrite(JSON.stringify(e, null, 2));
-          console.log(e.stack);
-          process.exit(1);
-        }
-        //console.log(JSON.stringify(results, null, 2) + '\n');
-        loadDataIntoMaps(org, kvmsLoadedCb(org));
-      });
-    }
-    else {
-      common.logWrite('ok. the required maps exist');
-      loadDataIntoMaps(org, kvmsLoadedCb(org));
-    }
-  });
+        const reducer = (p, name) =>
+          p.then( a =>
+                  org.kvms.create({ env: opt.options.env, name, encrypted:(name == opt.options.secretsmap)})
+                  .then( result => [...a, name] ) );
 
-});
+        p = missingMaps
+          .reduce(reducer, Promise.resolve([]));
+      }
+
+      return p
+        .then( _ => loadDataIntoMaps(org) )
+        .then( _ => {
+          common.logWrite('ok. the KVMs were loaded successfully.');
+          return checkAndCreateCache(org);
+        })
+        .then ( _ => common.logWrite('ok. the cache exists.') );
+    });
+  })
+  .catch( e => console.error('error: ' + e) );
