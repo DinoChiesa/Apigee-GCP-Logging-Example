@@ -19,24 +19,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2020-December-22 07:49:31>
+// last saved: <2021-March-08 07:32:14>
 
-const fs = require('fs'),
-    apigeejs = require('apigee-edge-js'),
-    common = apigeejs.utility,
-    apigee = apigeejs.edge,
-    sprintf = require('sprintf-js').sprintf,
-    Getopt = require('node-getopt'),
-    version = '20201222-0732',
-    defaults = { secretsmap : 'secrets1', settingsmap: 'settings1', cache: 'cache1', logid: 'syslog' },
-    getopt = new Getopt(common.commonOptions.concat([
-      ['e' , 'env=ARG', 'required. the Apigee environment for which to store the KVM data'],
-      ['Z' , 'secretsmap=ARG', 'optional. name of the KVM in Apigee for keys. Will be created if nec. Default: ' + defaults.secretsmap],
-      ['C' , 'cache=ARG', 'optional. name of the Cache in Apigee. Will be created if nec. Default: ' + defaults.cache],
-      ['S' , 'settingsmap=ARG', 'optional. name of the KVM in Apigee for other non-secret settings. Will be created if nec. Default: ' + defaults.settingsmap],
-      ['J' , 'privkeyjson=ARG', 'required. GCP Logging JSON private key file.'],
-      ['L' , 'logid=ARG', 'optional. GCP Logging log id for logging. Default: ' + defaults.logid]
-    ])).bindHelp();
+const fs       = require('fs'),
+      apigeejs = require('apigee-edge-js'),
+      common   = apigeejs.utility,
+      apigee   = apigeejs.edge,
+      sprintf  = require('sprintf-js').sprintf,
+      Getopt   = require('node-getopt'),
+      version  = '20210308-0725',
+      defaults = { secretsmap : 'secrets1', settingsmap: 'settings1', cache: 'cache1', logid: 'syslog' },
+      getopt   = new Getopt(common.commonOptions.concat([
+        ['e' , 'env=ARG', 'required. the Apigee environment for which to store the KVM data'],
+        ['Z' , 'secretsmap=ARG', 'optional. name of the KVM in Apigee for keys. Will be created if nec. Default: ' + defaults.secretsmap],
+        ['' , 'cache=ARG', 'optional. name of the Cache in Apigee. Will be created if nec. Default: ' + defaults.cache],
+        ['S' , 'settingsmap=ARG', 'optional. name of the KVM in Apigee for other non-secret settings. Will be created if nec. Default: ' + defaults.settingsmap],
+        ['J' , 'privkeyjson=ARG', 'required. GCP Logging JSON private key file.'],
+        ['L' , 'logid=ARG', 'optional. GCP Logging log id for logging. Default: ' + defaults.logid]
+      ])).bindHelp();
 
 // ========================================================
 
@@ -137,23 +137,19 @@ apigee.connect(options)
     common.logWrite('connected');
     return org.kvms.get({ env: opt.options.env })
     .then(result => {
-      let missingMaps = [opt.options.settingsmap, opt.options.secretsmap]
+      const missingMaps = [opt.options.settingsmap, opt.options.secretsmap]
         .filter( value => result.indexOf(value) == -1 )
-        .filter( (e, i, c) => c.indexOf(e) === i);// dedupe
+        .filter( (e, i, c) => c.indexOf(e) === i); // dedupe
 
-      let p = Promise.resolve({});
-
-      if (missingMaps && missingMaps.length > 0) {
-        common.logWrite('Need to create one or more maps');
-
-        const reducer = (p, name) =>
-          p.then( a =>
+      const p = (missingMaps && missingMaps.length > 0) ? ((() => {
+            common.logWrite('Need to create one or more maps');
+            const r = (p, name) =>
+            p.then( a =>
                   org.kvms.create({ env: opt.options.env, name, encrypted:(name == opt.options.secretsmap)})
                   .then( result => [...a, name] ) );
 
-        p = missingMaps
-          .reduce(reducer, Promise.resolve([]));
-      }
+            return missingMaps.reduce(r, Promise.resolve([]));
+          })()) : Promise.resolve({});
 
       return p
         .then( _ => loadDataIntoMaps(org) )
