@@ -1,8 +1,0 @@
-<KeyValueMapOperations name='KVM-Get-GCP-Logging-PrivateKey' mapIdentifier='secrets1'>
-  <Scope>environment</Scope>
-  <Get assignTo='private.gcplogging.privKeyPem'>
-    <Key>
-      <Parameter>gcplogging.privKeyPem</Parameter>
-    </Key>
-  </Get>
-</KeyValueMapOperations>

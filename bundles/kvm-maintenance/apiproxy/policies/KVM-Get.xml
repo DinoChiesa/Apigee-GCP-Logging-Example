@@ -1,0 +1,10 @@
+<KeyValueMapOperations name='KVM-Get'>
+  <Scope>environment</Scope>
+  <ExpiryTimeInSecs>5</ExpiryTimeInSecs>
+  <MapName ref='mapname'/>
+  <Get assignTo="private.myvar">
+    <Key>
+      <Parameter ref='request.queryparam.key'/>
+    </Key>
+  </Get>
+</KeyValueMapOperations>

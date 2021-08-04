@@ -1,0 +1,8 @@
+<Javascript name='JS-Shred-SAKey-JSON' timeLimit='200' >
+  <Properties>
+    <!-- this prefix should be "private" to obscure the data in Trace -->
+    <Property name='output-prefix'>private</Property>
+    <Property name='source'>private.sakeyjson</Property>
+  </Properties>
+  <ResourceURL>jsc://extractFlatJsonToContextVars.js</ResourceURL>
+</Javascript>

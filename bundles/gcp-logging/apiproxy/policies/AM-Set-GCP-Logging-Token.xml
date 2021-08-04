@@ -3,5 +3,9 @@
     <Name>gcplogging.token</Name>
     <Ref>gcplogging.newtoken</Ref>
   </AssignVariable>
+  <AssignVariable>
+    <Name>gcplogging.logid</Name>
+    <Ref>gcplogging.newtoken</Ref>
+  </AssignVariable>
   <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
 </AssignMessage>

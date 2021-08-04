@@ -2,12 +2,12 @@
   <Algorithm>RS256</Algorithm>
   <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
   <PrivateKey>
-    <Value ref="private.gcplogging.privKeyPem"/>
+    <Value ref="private.private_key"/>
   </PrivateKey>
 
-  <Issuer ref='gcplogging.jwt_issuer'/>
+  <Issuer ref='private.client_email'/>
   <Audience>https://www.googleapis.com/oauth2/v4/token</Audience>
-  <ExpiresIn>90s</ExpiresIn>
+  <ExpiresIn>30s</ExpiresIn>
 
   <AdditionalClaims>
     <Claim name='scope'>https://www.googleapis.com/auth/logging.write</Claim>

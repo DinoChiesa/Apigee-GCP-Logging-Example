@@ -1,0 +1,16 @@
+<AssignMessage name='AM-Set-GCP-Logging-Settings'>
+
+  <!-- use this in Logs Explorer to find the log entries -->
+  <AssignVariable>
+    <Name>gcplogging.logid</Name>
+    <Value>testlog</Value>
+  </AssignVariable>
+
+  <!-- the following comes from the (shredded) Service Account JSON key file -->
+  <AssignVariable>
+    <Name>gcplogging.projectid</Name>
+    <Ref>private.project_id</Ref>
+  </AssignVariable>
+
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+</AssignMessage>

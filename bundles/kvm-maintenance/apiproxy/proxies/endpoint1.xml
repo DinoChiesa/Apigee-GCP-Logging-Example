@@ -1,0 +1,114 @@
+<ProxyEndpoint name="endpoint1">
+
+  <HTTPProxyConnection>
+    <BasePath>/kvm-maintenance</BasePath>
+    <VirtualHost>secure</VirtualHost>
+  </HTTPProxyConnection>
+
+  <FaultRules/>
+  <DefaultFaultRule name="default-fault-rule">
+    <Step>
+      <Name>AM-InjectProxyVersionHeader</Name>
+    </Step>
+    <AlwaysEnforce>true</AlwaysEnforce>
+  </DefaultFaultRule>
+
+  <PreFlow name="PreFlow">
+    <Request/>
+    <Response/>
+  </PreFlow>
+
+  <PostFlow name="PostFlow">
+    <Request/>
+    <Response>
+      <Step>
+        <Name>AM-InjectProxyVersionHeader</Name>
+      </Step>
+    </Response>
+  </PostFlow>
+
+  <PostClientFlow name="PostClientFlow">
+    <Request/>
+    <Response>
+    </Response>
+  </PostClientFlow>
+
+  <Flows>
+    <Flow name="post-keyvalue-pair-to-kvm">
+      <!--
+        Examples:
+           curl -i -X POST $endpoint/kvm-maintenance/kvpair -d key=kvmkey -d value=1234
+
+           OR
+
+           curl -i -X POST $endpoint/kvm-maintenance/kvpair?mapame=YOURMAPNAMEHERE -d key=kvmkey -d value=1234
+
+           OR
+
+           curl -i -X POST $endpoint/kvm-maintenance/kvpair? -d key=kvmkey ==data-urlencode value@../secrets/my-sacreds.json
+
+      -->
+      <Request>
+        <Step>
+          <Name>RF-InvalidRequest</Name>
+          <Condition>request.formparam.key = null OR request.formparam.value = null</Condition>
+        </Step>
+        <Step>
+          <Name>AV-Mapname</Name>
+        </Step>
+        <Step>
+          <Name>KVM-Put</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-PutResponse</Name>
+        </Step>
+      </Response>
+      <Condition>proxy.pathsuffix MatchesPath "/kvpair" AND request.verb = "POST"</Condition>
+    </Flow>
+
+    <Flow name="get-kvm-value-for-key">
+      <!--
+        Examples:
+           curl -i -X GET $endpoint/kvm-maintenance/kvpair?key=kvmkey
+
+             OR
+
+           curl -i -X GET $endpoint/kvm-maintenance/kvpair?mapname=YOURMAPNAMEHERE\&key=kvmkey
+      -->
+      <Request>
+        <Step>
+          <Name>RF-InvalidRequest</Name>
+          <Condition>request.queryparam.key = null</Condition>
+        </Step>
+        <Step>
+          <Name>AV-Mapname</Name>
+        </Step>
+        <Step>
+          <Name>KVM-Get</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-GetResponse</Name>
+        </Step>
+      </Response>
+      <Condition>proxy.pathsuffix MatchesPath "/kvpair" AND request.verb = "GET"</Condition>
+    </Flow>
+
+    <Flow name="unknown request">
+      <Request>
+        <Step>
+          <Name>RF-UnknownRequest</Name>
+        </Step>
+      </Request>
+      <Response>
+      </Response>
+    </Flow>
+
+  </Flows>
+
+  <RouteRule name="none"/>
+
+</ProxyEndpoint>

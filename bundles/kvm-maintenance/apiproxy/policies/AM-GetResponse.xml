@@ -1,0 +1,11 @@
+<AssignMessage name='AM-GetResponse'>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+  <Remove>
+    <Headers/>
+  </Remove>
+  <Set>
+    <Payload contentType='text/plain'>{private.myvar}</Payload>
+    <StatusCode>200</StatusCode>
+    <ReasonPhrase>OK</ReasonPhrase>
+  </Set>
+</AssignMessage>

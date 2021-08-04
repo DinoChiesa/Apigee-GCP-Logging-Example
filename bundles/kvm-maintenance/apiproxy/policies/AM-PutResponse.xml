@@ -1,0 +1,10 @@
+<AssignMessage name='AM-PutResponse'>
+  <Remove>
+    <Headers/>
+  </Remove>
+  <Set>
+    <Payload/>
+    <StatusCode>204</StatusCode>
+    <ReasonPhrase>No Content</ReasonPhrase>
+  </Set>
+</AssignMessage>

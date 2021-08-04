@@ -1,5 +1,4 @@
 <PopulateCache name='Cache-Put-GCP-Logging-Token'>
-  <CacheResource>cache1</CacheResource>
   <Scope>Application</Scope>
   <Source>gcplogging.newtoken</Source>
   <CacheKey>

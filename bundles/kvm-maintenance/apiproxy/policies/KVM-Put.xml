@@ -1,0 +1,11 @@
+<KeyValueMapOperations name='KVM-Put'>
+  <Scope>environment</Scope>
+  <ExpiryTimeInSecs>5</ExpiryTimeInSecs>
+  <MapName ref='mapname'/>
+  <Put override="true">
+    <Key>
+      <Parameter ref='request.formparam.key'/>
+    </Key>
+    <Value ref="request.formparam.value"/>
+  </Put>
+</KeyValueMapOperations>

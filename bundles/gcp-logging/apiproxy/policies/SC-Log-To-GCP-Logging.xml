@@ -24,7 +24,10 @@
       <Verb>POST</Verb>
     </Set>
   </Request>
-  <Response>logResponse</Response>
+  <!-- omit the response to "fire and forget" -->
+  <!--
+      <Response>logResponse</Response>
+  -->
   <HTTPTargetConnection>
     <Properties>
       <Property name='success.codes'>2xx, 3xx</Property>

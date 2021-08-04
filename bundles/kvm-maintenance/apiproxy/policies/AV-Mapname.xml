@@ -1,0 +1,10 @@
+<AssignMessage name='AV-Mapname'>
+  <AssignVariable>
+    <Name>default_mapname</Name>
+    <Value>settings</Value>
+  </AssignVariable>
+  <AssignVariable>
+    <Name>mapname</Name>
+    <Template>{firstnonnull(request.queryparam.mapname,request.formparam.mapname,default_mapname)}</Template>
+  </AssignVariable>
+</AssignMessage>
