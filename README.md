@@ -101,7 +101,7 @@ like this:
 }
 ```
 
-That access token can then be used against the Logging APIs. And in fact, the same pattern applies for any of the services within Google Cloud: Pub/Sub, DLP, BigQuery, and so on.
+You can then use that access token as a bearer token with the Logging APIs. And in fact, the same pattern applies for any of the services within Google Cloud: Pub/Sub, DLP, BigQuery, and so on.
 
 For scalability, a system that logs to Cloud Logging should obtain and cache
 the access token, and must be able to obtain new access tokens on expiry.
@@ -111,7 +111,7 @@ That looks like this:
 
 ```
 POST https://logging.googleapis.com/v2/entries:write
-Authorization: Bearer :token
+Authorization: Bearer TOKEN_HERE
 
 {
   "logName": "projects/:projectid/logs/:logid",
