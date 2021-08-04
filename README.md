@@ -45,30 +45,36 @@ and Authorization Grants](https://tools.ietf.org/html/rfc7523)).  This grant is 
 much like a client credentials grant as described in [RFC 6749 - OAuth
 2.0](https://tools.ietf.org/html/rfc6749), except, rather than sending in a client_id
 and client_secret in order to obtain a token, the client must generate and self-sign a
-JWT, and send that JWT in the request-for-token. 
+JWT, and send that JWT in the request-for-token.
 
 
-This image depicts the flow: 
+This image depicts the flow:
 
 ![Sequence diagram: invoking the Cloud Logging API](./images/screenshot-20210803-164047.png)
 
 
 There are some requirements on the JWT. It must:
 
-* include the client email as the issuer
-* specify "https://www.googleapis.com/oauth2/v4/token" as the audience
+* be signed with RS256 using the private key associated to a service account
+* include the "service account email address" as the issuer
+* specify the `token_uri` value from the service account JSON file (currently `https://oauth2.googleapis.com/token`) as the audience
 * specify "https://www.googleapis.com/auth/logging.write" as the scope claim
 * expire within no more than 300 seconds
 * be signed with the client's private key.
 
-Example payload:
+An example header:
 
 ```json
 {"alg":"RS256","typ":"JWT"}
+```
+
+and payload:
+
+```json
 {
   "iss":"service-account-1@project-name-here.iam.gserviceaccount.com",
   "scope":"https://www.googleapis.com/auth/logging.write",
-  "aud":"https://www.googleapis.com/oauth2/v4/token",
+  "aud":"https://oauth2.googleapis.com/token",
   "exp":1328554385,
   "iat":1328550785
 }
