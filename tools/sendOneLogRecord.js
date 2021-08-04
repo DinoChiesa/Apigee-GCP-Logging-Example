@@ -18,7 +18,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2021-August-03 21:22:59>
+// last saved: <2021-August-03 22:20:41>
 
 const util    = require('util'),
       url     = require('url'),
@@ -81,18 +81,6 @@ function httpRequest({verbose, req}) {
   });
 }
 
-function resolveTilde(srcPath) {
-  const os = require('os');
-  if (srcPath.startsWith('~/') || srcPath === '~') {
-    return srcPath.replace('~', os.homedir());
-  }
-  if (srcPath.startsWith('~')) {
-    const path = require('path');
-    return path.resolve(os.homedir() + '/../' + srcPath.slice(1));
-  }
-  return srcPath;
-}
-
 const toBase64UrlNoPadding =
   s => s.replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 
@@ -107,7 +95,10 @@ function signJwt(header, payload, key) {
     throw new Error('unhandled alg: ' + header.alg);
   }
   let signer = crypto.createSign('sha256');
-  let signatureBase = [header, payload].map( x => base64EncodeString(JSON.stringify(x)) ).join('.');
+  let signatureBase =
+    [header, payload]
+      .map( x => base64EncodeString(JSON.stringify(x)) )
+      .join('.');
   signer.update(signatureBase);
   let computedSignature = toBase64UrlNoPadding(signer.sign(key, 'base64'));
   return signatureBase + '.' + computedSignature;
@@ -121,7 +112,7 @@ function getGoogleAuthJwt(ctx) {
         iss   : keyfile.client_email,
         aud   : keyfile.token_uri,
         iat   : nowInSeconds,
-        exp   : nowInSeconds + (3 * 60),
+        exp   : nowInSeconds + 60,
         scope : requiredScopes
       };
   if (ctx.options.verbose) {
