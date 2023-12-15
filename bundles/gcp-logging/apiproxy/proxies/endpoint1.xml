@@ -36,7 +36,7 @@
           no FlowHook for PostClientFlow.
 
           GCP Logging exposes a REST API for writing log messages. Invoking it requires
-          a bearer (access) token.
+          a bearer access token.
 
           Acquiring the token for GCP Logging involves an RFC7523 flow, in which
           the client generates a JWT signed with his own private key, sends the JWT to
@@ -53,18 +53,26 @@
 
       -->
       <Step>
-        <Name>KVM-Get-SAKey-JSON</Name>
-      </Step>
-      <Step>
-        <Name>JS-Shred-SAKey-JSON</Name>
-      </Step>
-      <Step>
         <!-- see if there is a viable token in cache -->
         <Name>Cache-Get-GCP-Logging-Token</Name>
       </Step>
+      <!--
+          It would be nice to be able to wrap a longer sequence of steps in one
+          condition. But that is currently not possible in Apigee.  The
+          following steps with the Condition `gcplogging.token = null` all get
+          executed only if there was a cache miss.
+      -->
+      <Step>
+        <Name>KVM-Get-SAKey-JSON</Name>
+        <Condition>gcplogging.token = null</Condition>
+      </Step>
+      <Step>
+        <Name>JS-Shred-SAKey-JSON</Name>
+        <Condition>gcplogging.token = null</Condition>
+      </Step>
       <Step>
         <!-- no token? generate a JWT to send to the Google OAuth service -->
-        <Name>JWT-Generate-GCP-Logging-token</Name>
+        <Name>JWT-Generate-Signed-Token-for-RFC7523-Flow</Name>
         <Condition>gcplogging.token = null</Condition>
       </Step>
       <Step>
@@ -83,9 +91,13 @@
         <Condition>gcplogging.token = null</Condition>
       </Step>
       <Step>
-        <!-- no token? check for failure (no new token) -->
+        <!-- check for failure (no new token) -->
         <Name>RF-No-AccessToken</Name>
         <Condition>(gcplogging.token = null) and (gcplogging.newtoken = null)</Condition>
+      </Step>
+      <Step>
+        <Name>JS-Reform-Expiry</Name>
+        <Condition>gcplogging.token = null</Condition>
       </Step>
       <Step>
         <!-- new token? insert it into cache -->
@@ -107,7 +119,7 @@
         <Condition>request.header.usesc = null</Condition>
       </Step>
       <Step>
-        <!-- or conditionally, invoke the logging API  via ServiceCallout -->
+        <!-- or conditionally, invoke the logging API via ServiceCallout -->
         <Name>SC-Log-To-GCP-Logging</Name>
         <Condition>request.header.usesc != null</Condition>
       </Step>

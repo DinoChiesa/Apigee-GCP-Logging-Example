@@ -4,5 +4,5 @@
     <Property name='output-prefix'>private</Property>
     <Property name='source'>private.sakeyjson</Property>
   </Properties>
-  <ResourceURL>jsc://extractFlatJsonToContextVars.js</ResourceURL>
+  <ResourceURL>jsc://extract-Flat-Json-To-Context-Variables.js</ResourceURL>
 </Javascript>

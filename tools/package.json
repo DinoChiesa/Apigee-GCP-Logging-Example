@@ -1,6 +1,6 @@
 {
   "name": "gcp-logging-apigee-edge-deploy-proxy",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Tools to provision the GCP Cloud Logging demonstration",
   "main": "importAndDeployProxy.js",
   "scripts": {
@@ -9,11 +9,12 @@
   "author": "dchiesa@google.com",
   "license": "Apache-2.0",
   "dependencies": {
-    "apigee-edge-js": "^0.4.27",
+    "apigee-edge-js": "^0.4.33",
     "node-getopt": "0.3.1",
     "sprintf-js": "^1.1.2"
   },
   "engines": {
-    "node": ">=10.x"
+    "node": ">=16.13.1",
+    "npm": ">= 8.3.0"
   }
 }

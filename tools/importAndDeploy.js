@@ -2,9 +2,9 @@
 /*jslint node:true */
 // importAndDeploy.js
 // ------------------------------------------------------------------
-// import and deploy an Apigee Edge proxy bundle or shared flow.
+// import and deploy an Apigee proxy bundle or shared flow.
 //
-// Copyright 2017-2020 Google LLC.
+// Copyright 2017-2021 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,40 +18,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2020-November-06 09:59:06>
+// last saved: <2022-December-05 09:15:19>
 
-const edgejs     = require('apigee-edge-js'),
-      common     = edgejs.utility,
+const apigeejs   = require('apigee-edge-js'),
+      common     = apigeejs.utility,
       util       = require('util'),
-      apigeeEdge = edgejs.edge,
+      apigee     = apigeejs.apigee,
       sprintf    = require('sprintf-js').sprintf,
       Getopt     = require('node-getopt'),
-      version    = '20190827-1405',
+      version    = '20210323-0848',
       defaults   = { basepath : null },
       getopt     = new Getopt(common.commonOptions.concat([
         ['d' , 'source=ARG', 'source directory for the proxy files. Should be parent of dir "apiproxy" or "sharedflowbundle"'],
         ['N' , 'name=ARG', 'override the name for the API proxy or shared flow. By default it\'s extracted from the XML file.'],
-        ['e' , 'env=ARG', 'the Edge environment(s) to which to deploy the asset. Separate multiple environments with a comma.'],
+        ['e' , 'env=ARG', 'the Apigee environment(s) to which to deploy the asset. Separate multiple environments with a comma.'],
         ['b' , 'basepath=ARG', 'basepath for deploying the API Proxy. Default: ' + defaults.basepath + '  Does not apply to sf.'],
         ['S' , 'sharedflow', 'import and deploy as a sharedflow. Default: import + deploy a proxy.']
       ])).bindHelp();
 
 // ========================================================
 
-console.log(
-  'Apigee Edge Proxy/Sharedflow Import + Deploy tool, version: ' + version + '\n' +
-    'Node.js ' + process.version + '\n');
-
 process.on('unhandledRejection',
             r => console.log('\n*** unhandled promise rejection: ' + util.format(r)));
 
-common.logWrite('start');
-
 // process.argv array starts with 'node' and 'scriptname.js'
-var opt = getopt.parse(process.argv.slice(2));
+let opt = getopt.parse(process.argv.slice(2));
+
+if (opt.options.verbose) {
+  console.log(
+    `Apigee Proxy/Sharedflow Import + Deploy tool, version: ${version}\n` +
+      `Node.js ${process.version}\n`);
+
+  common.logWrite('start');
+}
 
 if ( !opt.options.source ) {
-  console.log('You must specify a source directory');
+  console.log('You must specify a source directory or zip bundle');
   getopt.showHelp();
   process.exit(1);
 }
@@ -64,7 +66,7 @@ if (opt.options.basepath && opt.options.sharedflow) {
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-apigeeEdge
+apigee
   .connect(common.optToOptions(opt))
   .then( org => {
     common.logWrite('connected');

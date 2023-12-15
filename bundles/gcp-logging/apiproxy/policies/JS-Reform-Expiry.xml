@@ -1,0 +1,7 @@
+<Javascript name='JS-Reform-Expiry'>
+  <Source>
+    var varname = 'gcplogging.expires_in';
+    var c = Number(context.getVariable(varname));
+    context.setVariable(varname,c.toFixed(0));
+  </Source>
+</Javascript>

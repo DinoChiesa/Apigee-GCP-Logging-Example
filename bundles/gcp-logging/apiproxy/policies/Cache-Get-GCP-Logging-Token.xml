@@ -3,6 +3,5 @@
   <AssignTo>gcplogging.token</AssignTo>
   <CacheKey>
     <KeyFragment>gcplogging.token</KeyFragment>
-    <!-- <KeyFragment ref='flowvariable.name' /> -->
   </CacheKey>
 </LookupCache>

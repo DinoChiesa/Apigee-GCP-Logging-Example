@@ -1,14 +1,12 @@
-<GenerateJWT name='JWT-Generate-GCP-Logging-token'>
+<GenerateJWT name='JWT-Generate-Signed-Token-for-RFC7523-Flow'>
   <Algorithm>RS256</Algorithm>
   <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
   <PrivateKey>
     <Value ref="private.private_key"/>
   </PrivateKey>
-
   <Issuer ref='private.client_email'/>
   <Audience>https://www.googleapis.com/oauth2/v4/token</Audience>
   <ExpiresIn>30s</ExpiresIn>
-
   <AdditionalClaims>
     <Claim name='scope'>https://www.googleapis.com/auth/logging.write</Claim>
   </AdditionalClaims>

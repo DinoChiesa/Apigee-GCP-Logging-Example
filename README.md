@@ -1,11 +1,42 @@
 # Google Cloud Logging demo proxy
 
-This repo includes an API Proxy bundle showing how to do logging from
-Apigee to Google Cloud Operations Suite (formerly known as "Stackdriver").
+This repository includes an API Proxy bundle showing how to send log records
+from within an Apigee API Proxy, to Google Cloud Logging part of Operations
+Suite (formerly known as "Stackdriver").
+
+Cloud Logging exposes a REST API for writing log messages. Invoking it requires
+a bearer access token.
+
+This is an older example, and it shows two approaches that are no longer
+necessary in Apigee X and hybrid.
+
+1. It shows how to use a Service Account key JSON file, to sign a JWT with [the
+   GenerateJWT
+   policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/generate-jwt-policy),
+   then send that JWT via [the ServiceCallout
+   policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/service-callout-policy)
+   to https://www.googleapis.com/oauth2/v4/token to obtain an access token, and
+   subsequently use that access token in requests to Cloud Logging. And the
+   exchange-JWT-for-access-token flow is all wrapped in a cache.  _This approach
+   is no longer necessary in Apigee X or hybrid_.
+
+   X & hybrid now have the ability to automatically obtain and cache a token for
+   Google Cloud services, using the [Google Authentication
+   feature](https://cloud.google.com/apigee/docs/api-platform/security/google-auth/overview).
+
+2. This example shows the use of a KVM Administrative proxy, to allow
+   administrative updates to the Apigee Key Value Map.  X & hybrid now have
+   builtin administrative APIs for KVM management.
+
+Therefore you probably should not follow this example, if you are using X and
+hybrid, in those respects. There are simpler ways to do things now.  Even so I
+am keeping this example proxy as-is, just for educational purposes.  And you can
+continue to use this approach in Apigee Edge.
+
 
 ## License
 
-This material is Copyright 2017-2021 Google LLC and is licensed under the [Apache 2.0
+This material is Copyright 2017-2023 Google LLC and is licensed under the [Apache 2.0
 License](LICENSE). This includes the the API Proxy configuration as well as the
 nodejs programs and libraries.
 
@@ -25,9 +56,10 @@ the messages, and so on.
 
 ## How does GCP Operations Suite complement Apigee?
 
-Some people embed MessageLogging policies into the API Proxies they have in Apigee
-in order to log messages into log aggregators (like a syslog endpoint, or a Splunk collector) that can later be examined or analyzed, to diagnose
-problems or simply to monitor their systems. MessageLogging works for syslog
+Some people embed MessageLogging policies into the API Proxies they have in
+Apigee in order to log messages into log aggregators (like a syslog endpoint, or
+a Splunk collector) that can later be examined or analyzed, to diagnose problems
+or simply to monitor their systems. MessageLogging works for syslog
 listeners. For example, Splunk has a syslog listener that will accept inbound
 messages from a MessageLogging policy configured in Apigee Edge.
 
@@ -157,12 +189,28 @@ You can try this yourself.
 ## First things first: set up the project
 
 1. Visit [the Google Cloud console](https://console.cloud.google.com/),
-and select a project, or create a new project.
+   and select a project, or create a new project.
 
-2. Using [the service accounts
-management page](https://console.developers.google.com/iam-admin/serviceaccounts), create a
-service account, generate a new private key for the service account, and save the private
-key to a JSON file.  All of this is shown in the screencast.
+2. Using [the service accounts management
+   page](https://console.developers.google.com/iam-admin/serviceaccounts),
+   create a service account, generate a new private key for the service account,
+   and save the private key to a JSON file.  All of this is shown in the
+   screencast. Or, you can use the gcloud command-line tool to do the same:
+
+   ```sh
+   PROJECT=name-of-google-cloud-project
+   SA_NAME="gcp-logging-sa-201"
+   SA_EMAIL="${SA_NAME}@${PROJECT}.iam.gserviceaccount.com"
+   SA_KEY_FILE="${SA_NAME}-key-file.json"
+   NEEDED_ROLE=roles/logging.logWriter
+   gcloud config set core/project "$PROJECT"
+   gcloud iam service-accounts create "$SA_NAME"
+   gcloud projects add-iam-policy-binding "${PROJECT}" \
+         --member="serviceAccount:${SA_EMAIL}" \
+         --role="$NEEDED_ROLE"
+   gcloud iam service-accounts keys create "${SA_KEY_FILE}" \
+     --iam-account="${SA_EMAIL}"
+   ```
 
 
 ## Create the Apigee KVM
@@ -176,9 +224,7 @@ which is used to sign the JWT required to get each new access token.
 The settings1 KVM stores other
 operations- and GCP-related settings, like the project ID and so on.
 
-The proxy also uses the Apigee cache
-to store the access token for its lifetime.
-
+The proxy also uses the Apigee cache to store the access token for its lifetime.
 
 The API Proxy within Apigee uses a key-value map, named `secrets1`.  To set up
 the pre-requisite KVM, there is a [createKvm.js](./tools/createKvm.js) script in
@@ -188,22 +234,48 @@ organization and environment.
 Before you run this script, you must install the required node libraries. (You
 must have nodejs and npm installed to do this).
 
-```
+```sh
 cd tools
 npm install
 ```
 
-Then, run this from the tools directory:
+Then, obtain an access token.
+
+* For Apigee Edge, run this from the tools directory:
+  ```sh
+  # Apigee Edge
+  node ./getToken.js  -u username@example.com -o $ORG
+  ```
+
+  Replace `username@example.com` with your Apigee signin. You will have to
+  provide a password. You may need to provide a passcode; get that via
+  https://login.apigee.com/passcode, and then provide the passcode with the `-C`
+  option.
+
+  You should see a happy message.
+
+* For X or hybrid, use gcloud:
+  ```sh
+  # Apigee X/hybrid
+  gcloud auth print-access-token
+  ```
+
+Regardless whether you are using Edge or X/hybrid, store the resulting token
+into a shell variable:
+
+```sh
+TOKEN=yalklkdld...output...from..above
 ```
+
+Then, use the token to create a KVM:
+```sh
 ORG=myorg
 ENV=test
-node ./createKvm.js -u username@example.com -o $ORG -e $ENV
+# Apigee Edge
+node ./createKvm.js --token $TOKEN -o $ORG -e $ENV
+# Apigee X/hybrid
+node ./createKvm.js --token $TOKEN --apigeex -o $ORG -e $ENV
 ```
-
-Replace `username@example.com` with your Apigee signin. You will have to provide
-a password. You may need to provide a passcode; do so with the `-C` option.
-
-You should see a happy message.
 
 
 ## Load the Service Account key into the Apigee KVM
@@ -214,7 +286,10 @@ Run this from the tools directory:
 ```
 ORG=myorg
 ENV=test
-node ./importAndDeploy.js -u username@example.com -o $ORG -e $ENV ../bundles/kvm-maintenance
+# Apigee Edge
+node ./importAndDeploy.js --token $TOKEN -o $ORG -e $ENV ../bundles/kvm-maintenance
+# Apigee X/hybrid
+node ./importAndDeploy.js --token $TOKEN --apigeex -o $ORG -e $ENV ../bundles/kvm-maintenance
 ```
 
 You should see that the `kvm-maintenance` API proxy is deployed.
@@ -227,8 +302,14 @@ endpoint=https://$ORG-$ENV.apigee.net
 # For Apigee X or hybrid or OPDK
 endpoint=https://your-custom-endpoint.net
 
-curl -i -X POST $endpoint/kvm-maintenance/kvpair -d key=sakeyjson --data-urlencode value@/path-to/my-sacreds.json
+curl -i -X POST $endpoint/kvm-maintenance/kvpair\?mapname=secrets1 -d key=sakeyjson --data-urlencode value@/path-to/my-sacreds.json
 ```
+
+If you used `gcloud` previously to create and download the keyfile, then the command would be:
+```sh
+curl -i -X POST $endpoint/kvm-maintenance/kvpair\?mapname=secrets1 -d key=sakeyjson --data-urlencode value@"$SA_KEY_FILE"
+```
+
 
 The path should point to the JSON file containing the service-account key that
 you downloaded from Gooogle Cloud console
@@ -239,7 +320,6 @@ The JSON file contains information such as:
 * the PEM-encoded private key you got from GCP Cloud Logging
 * the issuer, or email of the service account you got from Operations
 
-
 This command loads the JSON file in its entirety into the encrypted KVM.
 
 ## Import and Deploy the Proxy
@@ -249,7 +329,10 @@ proxy that performs the logging.
 
 To do so, run this from the tools directory:
 ```
-node ./importAndDeploy.js -u username@example.com -o $ORG -e $ENV ../bundles/gcp-logging
+# Apigee Edge
+node ./importAndDeploy.js --token $TOKEN  -o $ORG -e $ENV -d ../bundles/gcp-logging
+# Apigee X/hybrid
+node ./importAndDeploy.js --token $TOKEN --apigeex -o $ORG -e $ENV -d ../bundles/gcp-logging
 ```
 
 Again, you should see a happy message.
@@ -259,17 +342,18 @@ Again, you should see a happy message.
 
 After you've provisioned the KVM and cache, and then imported and deployed the proxy, you should be able to invoke it.  Here's a sample call invoking the API proxy that does "inline" token refreshing:
 
-```
-curl -i https://$ORG-$ENV.apigee.net/gcp-logging/t1 \
+```sh
+curl -i $endpoint/gcp-logging/t1 \
   -H content-type:application/json \
   -d '{ "payload" : "YOUR MESSAGE GOES HERE" }'
 ```
+
 This invokes Operations Suite Logging via the httpClient from within a JavaScript callout. The httpClient does not wait for a response. This means a minimum of delay introduced into the proxy flow.
 
 To invoke the API that logs to Operations and waits for a response, we can use ServiceCallout. Like this:
 
 ```
-curl -i https://$ORG-$ENV.apigee.net/gcp-logging/t1 \
+curl -i $endpoint/gcp-logging/t1 \
   -H content-type:application/json \
   -H useSC:true \
   -d '{ "payload" : "This Message was Delivered via ServiceCallout" }'
@@ -288,3 +372,13 @@ use the same basic API Proxy to obtain a token for other services. You need only
 to request the proper scopes, in the JWT. And of course you need to assign the
 proper toles to the service account, to allow it to request tokens with those
 scopes.
+
+## Teardown
+
+1. Undeploy the proxies: kvm-maintenance and gcp-logging.
+2. Remove the Service account.
+3. delete the service account key file.
+4. remove the service account key entry (`sakeyjson`) from the `secrets1` KVM.
+5. optionally, delete the `secrets1` Key Value Map.
+
+

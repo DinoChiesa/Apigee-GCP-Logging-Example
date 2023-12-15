@@ -2,11 +2,9 @@
   <Scope>Application</Scope>
   <Source>gcplogging.newtoken</Source>
   <CacheKey>
-    <!-- <Prefix>gcplogging.token</Prefix> -->
     <KeyFragment>gcplogging.token</KeyFragment>
-    <!-- <KeyFragment ref='variable.containing.keyfrag' /> -->
   </CacheKey>
   <ExpirySettings>
-    <TimeoutInSec ref='gcplogging.expires_in'>3540</TimeoutInSec> <!-- 3540 = 3600-60 = default ttl -->
+    <TimeoutInSeconds ref='gcplogging.expires_in'>3540</TimeoutInSeconds> <!-- 3540 = 3600-60 = default ttl -->
   </ExpirySettings>
 </PopulateCache>

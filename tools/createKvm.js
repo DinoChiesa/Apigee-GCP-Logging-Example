@@ -5,7 +5,7 @@
 // create the KVM for the example API proxy that logs to
 // GCP logging.
 //
-// Copyright 2017-2021  Google LLC.
+// Copyright 2017-2023 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// last saved: <2021-August-03 17:34:48>
+// last saved: <2023-December-15 09:01:37>
 
 const apigeejs = require('apigee-edge-js'),
       common   = apigeejs.utility,
@@ -41,9 +41,7 @@ process.on('unhandledRejection',
 let opt = getopt.parse(process.argv.slice(2));
 
 if (opt.options.verbose) {
-  console.log(
-  `Apigee provisioning tool for GCP Logging demo, version: ${version}\n`);
-
+  console.log(`Apigee provisioning tool for GCP Logging demo, version: ${version}\n`);
   common.logWrite('start');
 }
 
@@ -61,14 +59,7 @@ if ( !opt.options.secretsmap ) {
 
 common.verifyCommonRequiredParameters(opt.options, getopt);
 
-const options = {
-      mgmtServer: opt.options.mgmtserver,
-      org : opt.options.org,
-      user: opt.options.username,
-      password: opt.options.password,
-      no_token: opt.options.notoken,
-      verbosity: opt.options.verbose || 0
-    };
+const options = common.optToOptions(opt);
 
 apigee.connect(options)
   .then (org => {
