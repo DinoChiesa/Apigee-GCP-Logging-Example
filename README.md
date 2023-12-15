@@ -69,16 +69,18 @@ using built-in policies.
 
 ## How it works
 
-The Logging API supports OAuth 2.0 for inbound API calls to write (or read, or
+The Cloud Logging API supports OAuth 2.0 for inbound API calls to write (or read, or
 query) log messages. For our purposes, we want Apigee to only write messages.  The
 OAuth token is a standard bearer token, and Google dispenses the token via an RFC7523
 grant (see [RFC 7523 - JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication
 and Authorization Grants](https://tools.ietf.org/html/rfc7523)).  This grant is very
 much like a client credentials grant as described in [RFC 6749 - OAuth
 2.0](https://tools.ietf.org/html/rfc6749), except, rather than sending in a client_id
-and client_secret in order to obtain a token, the client must generate and self-sign a
-JWT, and send that JWT in the request-for-token.
+and client_secret in order to obtain a token, the client must generate a specially-formed JWT, signed with the service account private key, and send that JWT in the request-for-token.
 
+> Note: For security reasons, Google [recommends _against_ creating service
+> account keys](https://cloud.google.com/iam/docs/best-practices-service-accounts#service-account-keys),
+> if it can be avoided.
 
 This image depicts the flow:
 
@@ -133,7 +135,9 @@ like this:
 }
 ```
 
-You can then use that access token as a bearer token with the Logging APIs. And in fact, the same pattern applies for any of the services within Google Cloud: Pub/Sub, DLP, BigQuery, and so on.
+You can then use that access token as a bearer token with the Logging APIs. And
+in fact, the same pattern applies for any of the services within Google Cloud:
+Pub/Sub, DLP, BigQuery, and so on.
 
 For scalability, a system that logs to Cloud Logging should obtain and cache
 the access token, and must be able to obtain new access tokens on expiry.
@@ -193,13 +197,14 @@ You can try this yourself.
 
 2. Using [the service accounts management
    page](https://console.developers.google.com/iam-admin/serviceaccounts),
-   create a service account, generate a new private key for the service account,
-   and save the private key to a JSON file.  All of this is shown in the
-   screencast. Or, you can use the gcloud command-line tool to do the same:
+   create a service account, grant the proper role to the service account,
+   generate a new private key for the service account, and save the private key
+   to a JSON file.  All of this is shown in the screencast. Or, you can use the
+   gcloud command-line tool to do the same:
 
    ```sh
    PROJECT=name-of-google-cloud-project
-   SA_NAME="gcp-logging-sa-201"
+   SA_NAME="gcp-logging-sa-101"
    SA_EMAIL="${SA_NAME}@${PROJECT}.iam.gserviceaccount.com"
    SA_KEY_FILE="${SA_NAME}-key-file.json"
    NEEDED_ROLE=roles/logging.logWriter
